@@ -1,0 +1,2187 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teaching Material Salvo Group - Interactive Learning</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1e3a8a 50%, #0f172a 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .chrome-text {
+            background: linear-gradient(135deg, #c0c0c0 0%, #ffffff 25%, #a0a0a0 50%, #ffffff 75%, #c0c0c0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(192, 192, 192, 0.5);
+        }
+        
+        .chrome-border {
+            border: 2px solid transparent;
+            background: linear-gradient(#0a0e27, #0a0e27) padding-box,
+                        linear-gradient(135deg, #c0c0c0, #ffffff, #808080, #ffffff, #c0c0c0) border-box;
+            box-shadow: 0 0 20px rgba(192, 192, 192, 0.3), inset 0 0 20px rgba(30, 58, 138, 0.2);
+        }
+        
+        .blue-glow {
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.5), 0 0 60px rgba(37, 99, 235, 0.3);
+        }
+        
+        .slide-container {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .slide {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+            flex: 1;
+        }
+        
+        .slide.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .glass-panel {
+            background: rgba(30, 58, 138, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(192, 192, 192, 0.2);
+        }
+        
+        .option-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .option-card:hover {
+            transform: translateX(10px);
+            background: rgba(59, 130, 246, 0.3);
+            border-color: #60a5fa;
+        }
+        
+        .option-card.selected {
+            background: rgba(59, 130, 246, 0.5);
+            border-color: #3b82f6;
+        }
+        
+        .option-card.correct {
+            background: rgba(34, 197, 94, 0.5);
+            border-color: #22c55e;
+        }
+        
+        .option-card.wrong {
+            background: rgba(239, 68, 68, 0.5);
+            border-color: #ef4444;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, #1e3a8a, #3b82f6, #60a5fa);
+            height: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        .nav-btn {
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            border: 1px solid rgba(192, 192, 192, 0.5);
+            transition: all 0.3s ease;
+        }
+        
+        .nav-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .particle {
+            position: absolute;
+            background: rgba(192, 192, 192, 0.5);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: float 10s infinite ease-in-out;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+        
+        .title-font {
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        .chrome-btn {
+            background: linear-gradient(135deg, #e5e7eb, #9ca3af, #e5e7eb);
+            color: #1e3a8a;
+            font-weight: 700;
+            border: 2px solid #c0c0c0;
+            box-shadow: 0 4px 15px rgba(192, 192, 192, 0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .chrome-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(192, 192, 192, 0.6);
+        }
+        
+        .score-circle {
+            background: conic-gradient(from 0deg, #3b82f6 var(--score-deg), rgba(30, 58, 138, 0.3) var(--score-deg));
+        }
+        
+        .tab-btn {
+            transition: all 0.3s ease;
+        }
+        
+        .tab-btn.active {
+            background: rgba(59, 130, 246, 0.4);
+            border-color: #60a5fa;
+            color: white;
+        }
+        
+        .content-section {
+            max-height: 60vh;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #3b82f6 #1e3a8a;
+        }
+        
+        .content-section::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .content-section::-webkit-scrollbar-track {
+            background: rgba(30, 58, 138, 0.3);
+        }
+        
+        .content-section::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 4px;
+        }
+        
+        .example-box {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.4), rgba(59, 130, 246, 0.2));
+            border-left: 4px solid #60a5fa;
+        }
+        
+        .highlight {
+            background: rgba(59, 130, 246, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #60a5fa;
+            font-weight: 600;
+        }
+        
+        .formula-box {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #3b82f6;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body class="text-gray-100">
+    <!-- Background Particles -->
+    <div id="particles" class="fixed inset-0 pointer-events-none z-0"></div>
+
+    <div class="slide-container relative z-10 max-w-7xl mx-auto p-4">
+        
+        <!-- Progress Bar -->
+        <div class="fixed top-0 left-0 w-full h-1 bg-gray-800 z-50">
+            <div id="progressBar" class="progress-bar" style="width: 0%"></div>
+        </div>
+
+        <!-- SLIDE 1: Opening -->
+        <div class="slide active" data-slide="1">
+            <div class="min-h-screen flex flex-col items-center justify-center text-center px-4">
+                <div class="mb-8 relative">
+                    <div class="absolute inset-0 bg-blue-500 blur-3xl opacity-20 rounded-full"></div>
+                    <h1 class="title-font text-5xl md:text-7xl font-black chrome-text mb-4 relative z-10 tracking-wider">
+                        TEACHING MATERIAL
+                    </h1>
+                    <h2 class="title-font text-4xl md:text-6xl font-bold text-blue-400 mb-6 relative z-10">
+                        SALVO GROUP
+                    </h2>
+                    <div class="w-32 h-1 bg-gradient-to-r from-transparent via-blue-400 to-transparent mx-auto mb-6"></div>
+                    <p class="text-xl md:text-2xl text-gray-300 font-light tracking-widest uppercase">
+                        Created by Mister & Mrs Salvo
+                    </p>
+                </div>
+                
+                <div class="glass-panel chrome-border rounded-2xl p-8 max-w-2xl mx-auto mb-8">
+                    <p class="text-lg text-gray-300 mb-6 leading-relaxed">
+                        Selamat datang di materi pembelajaran bahasa Inggris komprehensif yang mencakup 10 topik penting dengan pendekatan modern dan interaktif.
+                    </p>
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
+                            <span>10 Materi Detail</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
+                            <span>200 Soal Latihan</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
+                            <span>Sistem Scoring</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
+                            <span>Desain Modern</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="nextSlide()" class="chrome-btn px-8 py-4 rounded-full text-lg flex items-center gap-3 group">
+                    <span>Mulai Pembelajaran</span>
+                    <svg class="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: Part of Speech -->
+        <div class="slide" data-slide="2">
+            <div class="pt-20 pb-32 px-4 max-w-6xl mx-auto">
+                <div class="text-center mb-8">
+                    <h2 class="title-font text-4xl font-bold chrome-text mb-2">MATERI 1</h2>
+                    <h3 class="text-3xl font-bold text-blue-400">Part of Speech (Kata Kelas)</h3>
+                    <p class="text-gray-400 mt-2">Mengenal 8 jenis kata dalam bahasa Inggris secara detail</p>
+                </div>
+
+                <div class="flex gap-4 mb-6 justify-center flex-wrap">
+                    <button onclick="showTab('pos-material')" class="tab-btn active px-6 py-2 rounded-lg border border-blue-500/30 bg-blue-900/20">Materi</button>
+                    <button onclick="showTab('pos-quiz')" class="tab-btn px-6 py-2 rounded-lg border border-blue-500/30 bg-blue-900/20">Latihan (20 Soal)</button>
+                </div>
+
+                <div id="pos-material" class="tab-content">
+                    <div class="glass-panel chrome-border rounded-2xl p-6 content-section">
+                        <div class="space-y-6">
+                            <div class="example-box p-4 rounded-lg">
+                                <h4 class="text-xl font-bold text-blue-300 mb-3">📚 Pengertian Part of Speech</h4>
+                                <p class="text-gray-300 leading-relaxed">
+                                    Part of Speech adalah klasifikasi kata berdasarkan fungsi dan perannya dalam kalimat. Menguasai ini adalah <span class="highlight">FONDASI UTAMA</span> bahasa Inggris karena setiap kata memiliki aturan penggunaan yang berbeda.
+                                </p>
+                            </div>
+
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="bg-blue-900/30 p-4 rounded-lg border border-blue-500/30">
+                                    <h5 class="font-bold text-blue-300 mb-2">1. Noun (Kata Benda)</h5>
+                                    <p class="text-sm text-gray-300 mb-2">Menyebut orang, tempat, benda, atau konsep.</p>
+                                    <ul class="text-sm space-y-1 text-gray-400">
+                                        <li>• <span class="text-blue-400">Concrete:</span> book, table, Jakarta</li>
+                                        <li>• <span class="text-blue-400">Abstract:</span> love, happiness, idea</li>
+                                        <li>• <span class="text-blue-400">Countable:</span> books, chairs (bisa jamak)</li>
+                                        <li>• <span class="text-blue-400">Uncountable:</span> water, information</li>
+                                    </ul>
+                                    <div class="mt-2 p-2 bg-black/30 rounded text-xs">
+                                        <span class="text-green-400">Contoh:</span> The <span class="highlight">knowledge</span> is power.
+                                    </div>
+                                </div>
+
+                                <div class="bg-blue-900/30 p-4 rounded-lg border border-blue-500/30">
+                                    <h5 class="font-bold text-blue-300 mb-2">2. Pronoun (Kata Ganti)</h5>
+                                    <p class="text-sm text-gray-300 mb-2">Menggantikan noun untuk menghindari pengulangan.</p>
+                                    <ul class="text-sm space-y-1 text-gray-400">
+                                        <li>• <span class="text-blue-400">Personal:</span> I, you, he, she, it, we, they</li>
+                                        <li>• <span class="text-blue-400">Possessive:</span> mine, yours, his, hers</li>
+                                        <li>• <span class="text-blue-400">Demonstrative:</span> this, that, these, those</li>
+                                        <li>• <span class="text-blue-400">Relative:</span> who, which, that, whom</li>
+                                    </ul>
+                                    <div class="mt-2 p-2 bg-black/30 rounded text-xs">
+                                        <span class="text-green-400">Contoh:</span> <span class="highlight">She</span> loves <span class="highlight">her</span> book.
+                                    </div>
+                                </div>
+
+                                <div class="bg-blue-900/30 p-4 rounded-lg border border-blue-500/30">
+                                    <h5 class="font-bold text-blue-300 mb-2">3. Verb (Kata Kerja)</h5>
+                                    <p class="text-sm text-gray-300 mb-2">Menunjukkan aksi, keadaan, atau proses.</p>
+                                    <ul class="text-sm space-y-1 text-gray-400">
+                                        <li>• <span class="text-blue-400">Action:</span> run, think, write</li>
+                                        <li>• <span class="text-blue-400">Stative:</span> know, believe, love (tidak progresif)</li>
+                                        <li>• <span class="text-blue-400">Transitive:</span> need object (buy, eat)</li>
+                                        <li>• <span class="text-blue-400">Intransitive:</span> no object (sleep, arrive)</li>
+                                    </ul>
+                                    <div class="mt-2 p-2 bg-black/30 rounded text-xs">
+                                        <span class="text-green-400">Contoh:</span> They <span class="highlight">are studying</span> English.
+                                    </div>
+                                </div>
+
+                                <div class="bg-blue-900/30 p-4 rounded-lg border border-blue-500/30">
+                                    <h5 class="font-bold text-blue-300 mb-2">4. Adjective (Kata Sifat)</h5>
+                                    <p class="text-sm text-gray-300 mb-2">Menerangkan noun/pronoun.</p>
+                                    <ul class="text-sm space-y-1 text-gray-400">
+                                        <li>• <span class="text-blue-400">Descriptive:</span> beautiful, tall, expensive</li>
+                                        <li>• <span class="text-blue-400">Quantitative:</span> many, few, several</li>
+                                        <li>• <span class="text-blue-400">Demonstrative:</span> this, that, these</li>
+                                        <li>• <span class="text-blue-400">Possessive:</span> my, your, their</li>
+                                    </ul>
+                                    <div class="mt-2 p-2 bg-black/30 rounded text-xs">
+                                        <span class="text-green-400">Contoh:</span> A <span class="highlight">beautiful</span> <span class="highlight">young</span> girl.
+                                    </div>
+                                </div>
+
+                                <div class="bg-blue-900/30 p-4 rounded-lg border border-blue-500/30">
+                                    <h5 class="font-bold text-blue-300 mb-2">5. Adverb (Kata Keterangan)</h5>
+                                    <p class="text-sm text-gray-300 mb-2">Menerangkan verb, adjective, atau adverb lain.</p>
+                                    <ul class="text-sm space-y-1 text-gray-400">
+                                        <li>• <span class="text-blue-400">Manner:</span> quickly, carefully, well</li>
+                                        <li>• <span class="text-blue-400">Time:</span> now, yesterday, soon</li>
+                                        <li>• <span class="text-blue-400">Place:</span> here, there, everywhere</li>
+                                        <li>• <span class="text-blue-400">Degree:</span> very, extremely, quite</li>
+                                    </ul>
+                                    <div class="mt-2 p-2 bg-black/30 rounded text-xs">
+                                        <span class="text-green-400">Contoh:</span> She runs <span class="highlight">very quickly</span>.
+                                    </div>
+                                </div>
+
+                                <div class="bg-blue-900/30 p-4 rounded-lg border border-blue-500/30">
+                                    <h5 class="font-bold text-blue-300 mb-2">6. Preposition (Kata Depan)</h5>
+                                    <p class="text-sm text-gray-300 mb-2">Menunjukkan hubungan antara kata.</p>
+                                    <ul class="text-sm space-y-1 text-gray-400">
+                                        <li>• <span class="text-blue-400">Time:</span> at, on, in, during, for</li>
+                                        <li>• <span class="text-blue-400">Place:</span> at, on, in, under, between</li>
+                                        <li>• <span class="text-blue-400">Direction:</span> to, into, through, across</li>
+                                        <li>• <span class="text-blue-400">Agent:</span> by (written by him)</li>
+                                    </ul>
+                                    <div class="mt-2 p-2 bg-black/30 rounded text-xs">
+                                        <span class="text-green-400">Contoh:</span> The book is <span class="highlight">on</span> the table.
+                                    </div>
+                                </div>
+
+                                <div class="bg-blue-900/30 p-4 rounded-lg border border-blue-500/30">
+                                    <h5 class="font-bold text-blue-300 mb-2">7. Conjunction (Kata Sambung)</h5>
+                                    <p class="text-sm text-gray-300 mb-2">Menghubungkan kata, frasa, atau klausa.</p>
+                                    <ul class="text-sm space-y-1 text-gray-400">
+                                        <li>• <span class="text-blue-400">Coordinating:</span> FANBOYS (for, and, nor, but, or, yet, so)</li>
+                                        <li>• <span class="text-blue-400">Subordinating:</span> because, although, if, when</li>
+                                        <li>• <span class="text-blue-400">Correlative:</span> either...or, neither...nor</li>
+                                    </ul>
+                                    <div class="mt-2 p-2 bg-black/30 rounded text-xs">
+                                        <span class="text-green-400">Contoh:</span> I like tea <span class="highlight">but</span> she likes coffee.
+                                    </div>
+                                </div>
+
+                                <div class="bg-blue-900/30 p-4 rounded-lg border border-blue-500/30">
+                                    <h5 class="font-bold text-blue-300 mb-2">8. Interjection (Kata Seru)</h5>
+                                    <p class="text-sm text-gray-300 mb-2">Ungkapan emosi yang berdiri sendiri.</p>
+                                    <ul class="text-sm space-y-1 text-gray-400">
+                                        <li>• <span class="text-blue-400">Joy:</span> Wow! Hurray! Yay!</li>
+                                        <li>• <span class="text-blue-400">Surprise:</span> Oh! Ah! Gosh!</li>
+                                        <li>• <span class="text-blue-400">Pain:</span> Ouch! Ow!</li>
+                                        <li>• <span class="text-blue-400">Greeting:</span> Hello! Hi! Hey!</li>
+                                    </ul>
+                                    <div class="mt-2 p-2 bg-black/30 rounded text-xs">
+                                        <span class="text-green-400">Contoh:</span> <span class="highlight">Wow!</span> That's amazing!
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="formula-box p-4 rounded-lg mt-4">
+                                <h5 class="font-bold text-yellow-400 mb-2">💡 Tips Identifikasi Cepat:</h5>
+                                <ul class="text-sm space-y-2 text-gray-300">
+                                    <li>• Tanya "apa/ siapa?" → Noun</li>
+                                    <li>• Tanya "melakukan apa?" → Verb</li>
+                                    <li>• Tanya "seperti apa?" → Adjective</li>
+                                    <li>• Tanya "bagaimana/ kapan/ di mana?" → Adverb</li>
+                                    <li>• Ada setelah noun untuk kepemilikan → Preposition</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="pos-quiz" class="tab-content hidden">
+                    <div class="glass-panel chrome-border rounded-2xl p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-xl font-bold text-blue-300">Latihan Part of Speech</h4>
+                            <span class="text-sm text-gray-400">Soal <span id="pos-current">1</span>/20</span>
+                        </div>
+                        <div id="pos-question-container" class="mb-6">
+                            <!-- Questions injected by JS -->
+                        </div>
+                        <div id="pos-result" class="hidden text-center py-8">
+                            <div class="text-4xl font-bold mb-2" id="pos-score"></div>
+                            <p class="text-gray-400 mb-4" id="pos-message"></p>
+                            <button onclick="restartQuiz('pos')" class="chrome-btn px-6 py-2 rounded-lg">Ulangi Latihan</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: Personal Pronoun -->
+        <div class="slide" data-slide="3">
+            <div class="pt-20 pb-32 px-4 max-w-6xl mx-auto">
+                <div class="text-center mb-8">
+                    <h2 class="title-font text-4xl font-bold chrome-text mb-2">MATERI 2</h2>
+                    <h3 class="text-3xl font-bold text-blue-400">Personal Pronoun</h3>
+                    <p class="text-gray-400 mt-2">Mengapa harus menguasai kata ganti person?</p>
+                </div>
+
+                <div class="flex gap-4 mb-6 justify-center flex-wrap">
+                    <button onclick="showTab('pro-material')" class="tab-btn active px-6 py-2 rounded-lg border border-blue-500/30 bg-blue-900/20">Materi</button>
+                    <button onclick="showTab('pro-quiz')" class="tab-btn px-6 py-2 rounded-lg border border-blue-500/30 bg-blue-900/20">Latihan (20 Soal)</button>
+                </div>
+
+                <div id="pro-material" class="tab-content">
+                    <div class="glass-panel chrome-border rounded-2xl p-6 content-section">
+                        <div class="example-box p-4 rounded-lg mb-6">
+                            <h4 class="text-xl font-bold text-red-400 mb-2">⚠️ Mengapa WAJIB Menguasai Personal Pronoun?</h4>
+                            <p class="text-gray-300">
+                                Personal pronoun adalah <span class="highlight">JANTUNG</span> komunikasi bahasa Inggris. Tanpa ini, Anda tidak bisa membuat kalimat yang efisien dan natural. Setiap kalimat bahasa Inggris minimal mengandung 1 pronoun!
+                            </p>
+                        </div>
+
+                        <div class="grid md:grid-cols-3 gap-4 mb-6">
+                            <div class="bg-gradient-to-b from-blue-900/40 to-blue-800/20 p-4 rounded-lg border border-blue-400/30">
+                                <h5 class="font-bold text-blue-300 mb-3 text-center">Subjective Case</h5>
+                                <p class="text-xs text-gray-400 mb-3 text-center">Sebagai SUBJEK kalimat</p>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between p-2 bg-black/30 rounded"><span>I</span><span class="text-blue-400">Saya</span></div>
+                                    <div class="flex justify-between p-2 bg-black/30 rounded"><span>You</span><span class="text-blue-400">Kamu/Anda</span></div>
+                                    <div class="flex justify-between p-2 bg-black/30 rounded"><span>He</span><span class="text-blue-400">Dia (L)</span></div>
+                                    <div class="flex justify-between p-2 bg-black/30 rounded"><span>She</span><span class="text-blue-400">Dia (P)</span></div>
+                                    <div class="flex justify-between p-2 bg-black/30 rounded"><span>It</span><span class="text-blue-400">Dia (B)</span></div>
+                                    <div class="flex justify-between p-2 bg-black/30 rounded"><span>We</span><span class="text-blue-400">Kami/kita</span></div>
+                                    <div class="flex justify-between p-2 bg-black/30 rounded"><span>They</span><span class="text-blue-400">Mereka</span></div>
+                                </div>
+                                <div class="mt-3 p-2 bg-green-900/30 rounded text-xs border border-green-500/30">
+                                    <span class="text-green-400">Contoh:</span> <span class="highlight">She</span> is a doctor.
+                                </div>
+                            </div>
+
+                            <div class="bg-gradient-to-b from-purple-900/40 to-purple-800/20 p-4 rounded-lg border border-purple-400/30">
+                                <h5 class="font-bold text-purple-300 mb-3 text-center">Objective Case</h5>
+                                <p class="text-xs text-gray-400 mb-3 text-center">Sebagai OBJEK kalimat</p>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between p-2 bg-black/30 rounded"><span>Me</span><span class="text-purple-400">Saya</span></div>
+                                    <div class="flex justify-between p-2 bg-black/30 rounded"><span>You</span><span class="text-purple-400">Kamu</span></div>
+                                    <div class="flex justify-between p-2 bg-black/30 rounded"><span>Him</span><span class="text-purple-400">Dia (L)</span></div>
+                                    <div class="flex justify-between p-2 bg-black/30 rounded"><span>Her</span><span class="text-purple-400">Dia (P)</span></div>
+                                    <div class="flex justify-between p-2 bg-black/30 rounded"><span>It</span><span class="text-purple-400">Dia (B)</span></div>
+                                    <div class="flex justify-between p-2 bg-black/30 rounded"><span>Us</span><span class="text-purple-400">Kami</span></div>
+                                    <div class="flex justify-between p-2 bg-black/30 rounded"><span>Them</span><span class="text-purple-400">Mereka</span></div>
+                                </div>
+                                <div class="mt-3 p-2 bg-green-900/30 rounded text-xs border border-green-500/30">
+                                    <span class="text-green-400">Contoh:</span> I love <span class="highlight">him</span>.
+                                </div>
+                            </div>
+
+                            <div class="bg-gradient-to-b from-yellow-900/40 to-yellow-800/20 p-4 rounded-lg border border-yellow-400/30">
+                                <h5 class="font-bold text-yellow-300 mb-3 text-center">Possessive Case</h5>
+                                <p class="text-xs text-gray-400 mb-3 text-center">Menunjukkan kepemilikan</p>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between p-2 bg-black/30 rounded"><span>My/Mine</span><span class="text-yellow-400">Saya</span></div>
+                                    <div class="flex justify-between p-2 bg-black/30 rounded"><span>Your/Yours</span><span class="text-yellow-400">Kamu</span></div>
+                                    <div class="flex justify-between p-2 bg-black/30 rounded"><span>His</span><span class="text-yellow-400">Dia (L)</span></div>
+                                    <div class="flex justify-between p-2 bg-black/30 rounded"><span>Her/Hers</span><span class="text-yellow-400">Dia (P)</span></div>
+                                    <div class="flex justify-between p-2 bg-black/30 rounded"><span>Its</span><span class="text-yellow-400">Dia (B)</span></div>
+                                    <div class="flex justify-between p-2 bg-black/30 rounded"><span>Our/Ours</span><span class="text-yellow-400">Kami</span></div>
+                                    <div class="flex justify-between p-2 bg-black/30 rounded"><span>Their/Theirs</span><span class="text-yellow-400">Mereka</span></div>
+                                </div>
+                                <div class="mt-3 p-2 bg-green-900/30 rounded text-xs border border-green-500/30">
+                                    <span class="text-green-400">Contoh:</span> This is <span class="highlight">my</span> book. / The book is <span class="highlight">mine</span>.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="formula-box p-4 rounded-lg">
+                                <h5 class="font-bold text-red-400 mb-2">🚨 Common Mistakes:</h5>
+                                <ul class="text-sm space-y-2 text-gray-300">
+                                    <li>❌ <span class="text-red-400">Me and John</span> went there.</li>
+                                    <li>✅ <span class="text-green-400">John and I</span> went there.</li>
+                                    <li class="mt-2">❌ She loves <span class="text-red-400">he</span>.</li>
+                                    <li>✅ She loves <span class="text-green-400">him</span>.</li>
+                                    <li class="mt-2">❌ This is <span class="text-red-400">her book</span> vs <span class="text-red-400">hers book</span>.</li>
+                                    <li>✅ This is <span class="text-green-400">her book</span> (adj) / The book is <span class="text-green-400">hers</span> (pronoun).</li>
+                                </ul>
+                            </div>
+
+                            <div class="bg-blue-900/30 p-4 rounded-lg border border-blue-500/30">
+                                <h5 class="font-bold text-blue-300 mb-2">🎯 Tips Penggunaan:</h5>
+                                <ul class="text-sm space-y-2 text-gray-300">
+                                    <li>• <span class="highlight">It</span> untuk cuaca, waktu, jarak, dan binatang (kecuali peliharaan)</li>
+                                    <li>• <span class="highlight">They</span> bisa digunakan singular untuk gender netral: "Someone left their book."</li>
+                                    <li>• Setelah preposisi (in, on, at, with, etc.) selalu pakai objective case</li>
+                                    <li>• Possessive adjective (my, your, her) harus diikuti noun</li>
+                                    <li>• Possessive pronoun (mine, yours, hers) berdiri sendiri</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="pro-quiz" class="tab-content hidden">
+                    <div class="glass-panel chrome-border rounded-2xl p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-xl font-bold text-blue-300">Latihan Personal Pronoun</h4>
+                            <span class="text-sm text-gray-400">Soal <span id="pro-current">1</span>/20</span>
+                        </div>
+                        <div id="pro-question-container" class="mb-6"></div>
+                        <div id="pro-result" class="hidden text-center py-8">
+                            <div class="text-4xl font-bold mb-2" id="pro-score"></div>
+                            <p class="text-gray-400 mb-4" id="pro-message"></p>
+                            <button onclick="restartQuiz('pro')" class="chrome-btn px-6 py-2 rounded-lg">Ulangi Latihan</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: Subject Predicate -->
+        <div class="slide" data-slide="4">
+            <div class="pt-20 pb-32 px-4 max-w-6xl mx-auto">
+                <div class="text-center mb-8">
+                    <h2 class="title-font text-4xl font-bold chrome-text mb-2">MATERI 3</h2>
+                    <h3 class="text-3xl font-bold text-blue-400">Subject & Predicate</h3>
+                    <p class="text-gray-400 mt-2">Struktur dasar kalimat bahasa Inggris</p>
+                </div>
+
+                <div class="flex gap-4 mb-6 justify-center flex-wrap">
+                    <button onclick="showTab('sp-material')" class="tab-btn active px-6 py-2 rounded-lg border border-blue-500/30 bg-blue-900/20">Materi</button>
+                    <button onclick="showTab('sp-quiz')" class="tab-btn px-6 py-2 rounded-lg border border-blue-500/30 bg-blue-900/20">Latihan (20 Soal)</button>
+                </div>
+
+                <div id="sp-material" class="tab-content">
+                    <div class="glass-panel chrome-border rounded-2xl p-6 content-section">
+                        <div class="text-center mb-6">
+                            <div class="inline-flex items-center gap-4 text-2xl font-bold">
+                                <div class="bg-blue-600 px-6 py-3 rounded-lg">SUBJECT</div>
+                                <div class="text-gray-400">+</div>
+                                <div class="bg-purple-600 px-6 py-3 rounded-lg">PREDICATE</div>
+                                <div class="text-gray-400">=</div>
+                                <div class="bg-green-600 px-6 py-3 rounded-lg">SENTENCE</div>
+                            </div>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-6 mb-6">
+                            <div class="bg-blue-900/30 p-5 rounded-lg border border-blue-500/30">
+                                <h4 class="text-xl font-bold text-blue-300 mb-3">📍 Subject (Subjek)</h4>
+                                <p class="text-gray-300 mb-3">Orang, benda, atau konsep yang melakukan aksi atau menjadi topik pembicaraan.</p>
+                                
+                                <div class="space-y-3">
+                                    <div class="p-3 bg-black/30 rounded">
+                                        <span class="text-blue-400 font-bold">Simple Subject:</span>
+                                        <p class="text-sm text-gray-400 mt-1">Kata benda/pronoun utama</p>
+                                        <p class="text-green-400 text-sm mt-1"><span class="highlight">The tall boy</span> runs fast. → Boy</p>
+                                    </div>
+                                    <div class="p-3 bg-black/30 rounded">
+                                        <span class="text-blue-400 font-bold">Complete Subject:</span>
+                                        <p class="text-sm text-gray-400 mt-1">Seluruh bagian sebelum verb</p>
+                                        <p class="text-green-400 text-sm mt-1"><span class="highlight">The tall boy in blue shirt</span> runs.</p>
+                                    </div>
+                                    <div class="p-3 bg-black/30 rounded">
+                                        <span class="text-blue-400 font-bold">Compound Subject:</span>
+                                        <p class="text-sm text-gray-400 mt-1">Lebih dari satu subjek</p>
+                                        <p class="text-green-400 text-sm mt-1"><span class="highlight">John and Mary</span> are coming.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-purple-900/30 p-5 rounded-lg border border-purple-500/30">
+                                <h4 class="text-xl font-bold text-purple-300 mb-3">🎯 Predicate (Predikat)</h4>
+                                <p class="text-gray-300 mb-3">Bagian kalimat yang menerangkan apa yang dilakukan subjek.</p>
+                                
+                                <div class="space-y-3">
+                                    <div class="p-3 bg-black/30 rounded">
+                                        <span class="text-purple-400 font-bold">Simple Predicate:</span>
+                                        <p class="text-sm text-gray-400 mt-1">Verb utama saja</p>
+                                        <p class="text-green-400 text-sm mt-1">The boy <span class="highlight">runs</span> very fast.</p>
+                                    </div>
+                                    <div class="p-3 bg-black/30 rounded">
+                                        <span class="text-purple-400 font-bold">Complete Predicate:</span>
+                                        <p class="text-sm text-gray-400 mt-1">Verb + objek/keterangan</p>
+                                        <p class="text-green-400 text-sm mt-1">The boy <span class="highlight">runs very fast in the morning</span>.</p>
+                                    </div>
+                                    <div class="p-3 bg-black/30 rounded">
+                                        <span class="text-purple-400 font-bold">Compound Predicate:</span>
+                                        <p class="text-sm text-gray-400 mt-1">Lebih dari satu verb</p>
+                                        <p class="text-green-400 text-sm mt-1">She <span class="highlight">sings and dances</span>.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="formula-box p-5 rounded-lg mb-6">
+                            <h5 class="font-bold text-yellow-400 mb-3">🔍 Cara Identifikasi Subject:</h5>
+                            <ol class="list-decimal list-inside space-y-2 text-gray-300 text-sm">
+                                <li>Tanyakan "Siapa/Apa yang...?" sebelum verb</li>
+                                <li>Abaikan prepositional phrases (in, on, at, etc.)</li>
+                                <li>Subject selalu NOUN atau PRONOUN</li>
+                                <li>Jika ada "there is/are", subject ada sesudah verb</li>
+                            </ol>
+                            <div class="mt-3 p-3 bg-black/40 rounded">
+                                <p class="text-xs text-gray-400">Contoh analisis:</p>
+                                <p class="text-sm"><span class="text-blue-400">[The students in the classroom]</span> <span class="text-purple-400">are studying English grammar diligently.</span></p>
+                                <p class="text-xs text-gray-500 mt-1">Complete Subject | Complete Predicate</p>
+                            </div>
+                        </div>
+
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <div class="bg-green-900/20 p-4 rounded border border-green-500/30">
+                                <h6 class="font-bold text-green-400 mb-2">Inverted Order</h6>
+                                <p class="text-xs text-gray-300">Verb sebelum subject (pertanyaan)</p>
+                                <p class="text-sm mt-2"><span class="highlight">Are</span> <span class="text-green-400">you</span> ready?</p>
+                            </div>
+                            <div class="bg-orange-900/20 p-4 rounded border border-orange-500/30">
+                                <h6 class="font-bold text-orange-400 mb-2">Imperative</h6>
+                                <p class="text-xs text-gray-300">Subject "you" tersembunyi</p>
+                                <p class="text-sm mt-2">[<span class="text-orange-400">You</span>] <span class="highlight">Close</span> the door!</p>
+                            </div>
+                            <div class="bg-pink-900/20 p-4 rounded border border-pink-500/30">
+                                <h6 class="font-bold text-pink-400 mb-2">Expletive</h6>
+                                <p class="text-xs text-gray-300">There/It sebagai pembuka</p>
+                                <p class="text-sm mt-2"><span class="highlight">There</span> is <span class="text-pink-400">a book</span> on the table.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="sp-quiz" class="tab-content hidden">
+                    <div class="glass-panel chrome-border rounded-2xl p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-xl font-bold text-blue-300">Latihan Subject & Predicate</h4>
+                            <span class="text-sm text-gray-400">Soal <span id="sp-current">1</span>/20</span>
+                        </div>
+                        <div id="sp-question-container" class="mb-6"></div>
+                        <div id="sp-result" class="hidden text-center py-8">
+                            <div class="text-4xl font-bold mb-2" id="sp-score"></div>
+                            <p class="text-gray-400 mb-4" id="sp-message"></p>
+                            <button onclick="restartQuiz('sp')" class="chrome-btn px-6 py-2 rounded-lg">Ulangi Latihan</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: Phrase vs Clause -->
+        <div class="slide" data-slide="5">
+            <div class="pt-20 pb-32 px-4 max-w-6xl mx-auto">
+                <div class="text-center mb-8">
+                    <h2 class="title-font text-4xl font-bold chrome-text mb-2">MATERI 4</h2>
+                    <h3 class="text-3xl font-bold text-blue-400">Phrase vs Clause</h3>
+                    <p class="text-gray-400 mt-2">Memahami perbedaan fundamental struktur kalimat</p>
+                </div>
+
+                <div class="flex gap-4 mb-6 justify-center flex-wrap">
+                    <button onclick="showTab('pc-material')" class="tab-btn active px-6 py-2 rounded-lg border border-blue-500/30 bg-blue-900/20">Materi</button>
+                    <button onclick="showTab('pc-quiz')" class="tab-btn px-6 py-2 rounded-lg border border-blue-500/30 bg-blue-900/20">Latihan (20 Soal)</button>
+                </div>
+
+                <div id="pc-material" class="tab-content">
+                    <div class="glass-panel chrome-border rounded-2xl p-6 content-section">
+                        <div class="grid md:grid-cols-2 gap-6 mb-6">
+                            <div class="bg-red-900/20 p-5 rounded-lg border-2 border-red-500/30">
+                                <h4 class="text-2xl font-bold text-red-400 mb-3">PHRASE</h4>
+                                <div class="bg-black/40 p-3 rounded mb-3">
+                                    <p class="text-sm text-gray-300">Kelompok kata yang <span class="highlight text-red-400">TIDAK mengandung subject dan verb</span> yang saling berhubungan.</p>
+                                </div>
+                                <p class="text-xs text-gray-400 mb-2">Tidak bisa berdiri sendiri sebagai kalimat!</p>
+                                
+                                <div class="space-y-2 text-sm">
+                                    <div class="p-2 bg-red-950/30 rounded border-l-2 border-red-500">
+                                        <span class="text-red-300 font-bold">Noun Phrase:</span>
+                                        <p class="text-gray-400"><span class="highlight">The big red car</span> is fast.</p>
+                                    </div>
+                                    <div class="p-2 bg-red-950/30 rounded border-l-2 border-red-500">
+                                        <span class="text-red-300 font-bold">Verb Phrase:</span>
+                                        <p class="text-gray-400">She <span class="highlight">has been working</span> hard.</p>
+                                    </div>
+                                    <div class="p-2 bg-red-950/30 rounded border-l-2 border-red-500">
+                                        <span class="text-red-300 font-bold">Prepositional:</span>
+                                        <p class="text-gray-400">The book is <span class="highlight">on the table</span>.</p>
+                                    </div>
+                                    <div class="p-2 bg-red-950/30 rounded border-l-2 border-red-500">
+                                        <span class="text-red-300 font-bold">Infinitive:</span>
+                                        <p class="text-gray-400">I want <span class="highlight">to eat</span> now.</p>
+                                    </div>
+                                    <div class="p-2 bg-red-950/30 rounded border-l-2 border-red-500">
+                                        <span class="text-red-300 font-bold">Gerund:</span>
+                                        <p class="text-gray-400"><span class="highlight">Swimming</span> is fun.</p>
+                                    </div>
+                                    <div class="p-2 bg-red-950/30 rounded border-l-2 border-red-500">
+                                        <span class="text-red-300 font-bold">Participial:</span>
+                                        <p class="text-gray-400"><span class="highlight">Running fast</span>, he won.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-green-900/20 p-5 rounded-lg border-2 border-green-500/30">
+                                <h4 class="text-2xl font-bold text-green-400 mb-3">CLAUSE</h4>
+                                <div class="bg-black/40 p-3 rounded mb-3">
+                                    <p class="text-sm text-gray-300">Kelompok kata yang <span class="highlight text-green-400">MENGANDUNG subject dan verb</span> yang saling berhubungan.</p>
+                                </div>
+                                <p class="text-xs text-gray-400 mb-2">Bisa independent (kalimat) atau dependent!</p>
+                                
+                                <div class="space-y-2 text-sm">
+                                    <div class="p-2 bg-green-950/30 rounded border-l-2 border-green-500">
+                                        <span class="text-green-300 font-bold">Independent:</span>
+                                        <p class="text-gray-400"><span class="highlight">I love you</span>. (Bisa jadi kalimat)</p>
+                                    </div>
+                                    <div class="p-2 bg-green-950/30 rounded border-l-2 border-green-500">
+                                        <span class="text-green-300 font-bold">Dependent (Adj):</span>
+                                        <p class="text-gray-400">The man <span class="highlight">who wears hat</span> is my uncle.</p>
+                                    </div>
+                                    <div class="p-2 bg-green-950/30 rounded border-l-2 border-green-500">
+                                        <span class="text-green-300 font-bold">Dependent (Adv):</span>
+                                        <p class="text-gray-400"><span class="highlight">When I was young</span>, I lived there.</p>
+                                    </div>
+                                    <div class="p-2 bg-green-950/30 rounded border-l-2 border-green-500">
+                                        <span class="text-green-300 font-bold">Dependent (Noun):</span>
+                                        <p class="text-gray-400">I know <span class="highlight">that he is right</span>.</p>
+                                    </div>
+                                    <div class="p-2 bg-green-950/30 rounded border-l-2 border-green-500">
+                                        <span class="text-green-300 font-bold">Relative:</span>
+                                        <p class="text-gray-400">The book <span class="highlight">which I bought</span> is good.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="formula-box p-5 rounded-lg">
+                            <h5 class="font-bold text-yellow-400 mb-3">⚡ Perbedaan Kunci:</h5>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <p class="text-red-400 font-bold mb-2">Phrase:</p>
+                                    <ul class="text-sm space-y-1 text-gray-300">
+                                        <li>• No subject-verb relationship</li>
+                                        <li>• Tidak lengkap</li>
+                                        <li>• Harus digabung dengan clause</li>
+                                        <li>• Contoh: "in the morning", "running fast"</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <p class="text-green-400 font-bold mb-2">Clause:</p>
+                                    <ul class="text-sm space-y-1 text-gray-300">
+                                        <li>• Ada subject + verb</li>
+                                        <li>• Lengkap tapi bisa dependent</li>
+                                        <li>• Independent = kalimat</li>
+                                        <li>• Contoh: "when I wake up", "she sings"</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="pc-quiz" class="tab-content hidden">
+                    <div class="glass-panel chrome-border rounded-2xl p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-xl font-bold text-blue-300">Latihan Phrase vs Clause</h4>
+                            <span class="text-sm text-gray-400">Soal <span id="pc-current">1</span>/20</span>
+                        </div>
+                        <div id="pc-question-container" class="mb-6"></div>
+                        <div id="pc-result" class="hidden text-center py-8">
+                            <div class="text-4xl font-bold mb-2" id="pc-score"></div>
+                            <p class="text-gray-400 mb-4" id="pc-message"></p>
+                            <button onclick="restartQuiz('pc')" class="chrome-btn px-6 py-2 rounded-lg">Ulangi Latihan</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: Verbal vs Nominal -->
+        <div class="slide" data-slide="6">
+            <div class="pt-20 pb-32 px-4 max-w-6xl mx-auto">
+                <div class="text-center mb-8">
+                    <h2 class="title-font text-4xl font-bold chrome-text mb-2">MATERI 5</h2>
+                    <h3 class="text-3xl font-bold text-blue-400">Verbal & Nominal</h3>
+                    <p class="text-gray-400 mt-2">Memahami fungsi kata kerja dan kata benda dalam kalimat</p>
+                </div>
+
+                <div class="flex gap-4 mb-6 justify-center flex-wrap">
+                    <button onclick="showTab('vn-material')" class="tab-btn active px-6 py-2 rounded-lg border border-blue-500/30 bg-blue-900/20">Materi</button>
+                    <button onclick="showTab('vn-quiz')" class="tab-btn px-6 py-2 rounded-lg border border-blue-500/30 bg-blue-900/20">Latihan (20 Soal)</button>
+                </div>
+
+                <div id="vn-material" class="tab-content">
+                    <div class="glass-panel chrome-border rounded-2xl p-6 content-section">
+                        <div class="mb-6">
+                            <h4 class="text-2xl font-bold text-blue-300 mb-4">🔄 Verbal (Kata Kerja)</h4>
+                            <p class="text-gray-300 mb-4">Kata yang menunjukkan aksi, keadaan, atau kejadian. Verbal adalah <span class="highlight">jantung</span> predikat.</p>
+                            
+                            <div class="grid md:grid-cols-3 gap-4 mb-6">
+                                <div class="bg-blue-900/30 p-4 rounded border border-blue-500/30">
+                                    <h5 class="font-bold text-blue-400 mb-2">Finite Verb</h5>
+                                    <p class="text-xs text-gray-400 mb-2">Verb yang punya subject dan menunjukkan waktu (tense).</p>
+                                    <div class="space-y-1 text-sm">
+                                        <p class="text-green-400">She <span class="highlight">writes</span> a letter.</p>
+                                        <p class="text-green-400">They <span class="highlight">went</span> home.</p>
+                                    </div>
+                                </div>
+                                <div class="bg-purple-900/30 p-4 rounded border border-purple-500/30">
+                                    <h5 class="font-bold text-purple-400 mb-2">Non-finite Verb</h5>
+                                    <p class="text-xs text-gray-400 mb-2">Verb yang tidak menunjukkan waktu/subject.</p>
+                                    <div class="space-y-1 text-sm">
+                                        <p class="text-purple-400">Gerund: <span class="highlight">Swimming</span> is good.</p>
+                                        <p class="text-purple-400">Infinitive: I want <span class="highlight">to go</span>.</p>
+                                        <p class="text-purple-400">Participle: <span class="highlight">Broken</span> heart.</p>
+                                    </div>
+                                </div>
+                                <div class="bg-orange-900/30 p-4 rounded border border-orange-500/30">
+                                    <h5 class="font-bold text-orange-400 mb-2">Auxiliary Verb</h5>
+                                    <p class="text-xs text-gray-400 mb-2">Helping verb yang membentuk tenses/modal.</p>
+                                    <div class="space-y-1 text-sm">
+                                        <p class="text-orange-400">Be: am, is, are, was, were</p>
+                                        <p class="text-orange-400">Have: have, has, had</p>
+                                        <p class="text-orange-400">Do: do, does, did</p>
+                                        <p class="text-orange-400">Modals: can, will, must, etc.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <h4 class="text-2xl font-bold text-yellow-300 mb-4">🏛️ Nominal (Kata Benda)</h4>
+                            <p class="text-gray-300 mb-4">Kata atau kelompok kata yang berfungsi sebagai noun (subjek, objek, komplemen).</p>
+                            
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="bg-yellow-900/20 p-4 rounded border border-yellow-500/30">
+                                    <h5 class="font-bold text-yellow-400 mb-2">Jenis Nominal:</h5>
+                                    <ul class="text-sm space-y-2 text-gray-300">
+                                        <li>• <span class="text-yellow-400">Noun:</span> book, happiness, Jakarta</li>
+                                        <li>• <span class="text-yellow-400">Pronoun:</span> he, she, it, they</li>
+                                        <li>• <span class="text-yellow-400">Noun Phrase:</span> the big red car</li>
+                                        <li>• <span class="text-yellow-400">Gerund:</span> Swimming is fun.</li>
+                                        <li>• <span class="text-yellow-400">Infinitive:</span> To err is human.</li>
+                                        <li>• <span class="text-yellow-400">Noun Clause:</span> What he said is true.</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-green-900/20 p-4 rounded border border-green-500/30">
+                                    <h5 class="font-bold text-green-400 mb-2">Fungsi Nominal:</h5>
+                                    <ul class="text-sm space-y-2 text-gray-300">
+                                        <li>• <span class="text-green-400">Subject:</span> <span class="highlight">The dog</span> barks.</li>
+                                        <li>• <span class="text-green-400">Object:</span> I love <span class="highlight">you</span>.</li>
+                                        <li>• <span class="text-green-400">Complement:</span> She is <span class="highlight">a doctor</span>.</li>
+                                        <li>• <span class="text-green-400">Object of Prep:</span> Give it to <span class="highlight">him</span>.</li>
+                                        <li>• <span class="text-green-400">Appositive:</span> My friend, <span class="highlight">John</span>, is here.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="formula-box p-4 rounded-lg">
+                            <h5 class="font-bold text-cyan-400 mb-2">⚖️ Perbedaan Verbal dan Nominal:</h5>
+                            <div class="grid md:grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <p class="text-blue-400 font-bold">Verbal Sentence:</p>
+                                    <p class="text-gray-400">Fokus pada AKSI/KEJADIAN</p>
+                                    <p class="mt-1 text-green-400">The cat <span class="highlight">sleeps</span> on the sofa.</p>
+                                </div>
+                                <div>
+                                    <p class="text-yellow-400 font-bold">Nominal Sentence:</p>
+                                    <p class="text-gray-400">Fokus pada KEADAAN/IDENTITAS</p>
+                                    <p class="mt-1 text-green-400">The cat <span class="highlight">is</span> an animal.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="vn-quiz" class="tab-content hidden">
+                    <div class="glass-panel chrome-border rounded-2xl p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-xl font-bold text-blue-300">Latihan Verbal & Nominal</h4>
+                            <span class="text-sm text-gray-400">Soal <span id="vn-current">1</span>/20</span>
+                        </div>
+                        <div id="vn-question-container" class="mb-6"></div>
+                        <div id="vn-result" class="hidden text-center py-8">
+                            <div class="text-4xl font-bold mb-2" id="vn-score"></div>
+                            <p class="text-gray-400 mb-4" id="vn-message"></p>
+                            <button onclick="restartQuiz('vn')" class="chrome-btn px-6 py-2 rounded-lg">Ulangi Latihan</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 7: V1 V2 V3 -->
+        <div class="slide" data-slide="7">
+            <div class="pt-20 pb-32 px-4 max-w-6xl mx-auto">
+                <div class="text-center mb-8">
+                    <h2 class="title-font text-4xl font-bold chrome-text mb-2">MATERI 6</h2>
+                    <h3 class="text-3xl font-bold text-blue-400">V1, V2, V3 (Verb Forms)</h3>
+                    <p class="text-gray-400 mt-2">Memahami bentuk kata kerja dan penggunaannya</p>
+                </div>
+
+                <div class="flex gap-4 mb-6 justify-center flex-wrap">
+                    <button onclick="showTab('v-material')" class="tab-btn active px-6 py-2 rounded-lg border border-blue-500/30 bg-blue-900/20">Materi</button>
+                    <button onclick="showTab('v-quiz')" class="tab-btn px-6 py-2 rounded-lg border border-blue-500/30 bg-blue-900/20">Latihan (20 Soal)</button>
+                </div>
+
+                <div id="v-material" class="tab-content">
+                    <div class="glass-panel chrome-border rounded-2xl p-6 content-section">
+                        <div class="grid md:grid-cols-3 gap-4 mb-6">
+                            <div class="bg-blue-900/40 p-4 rounded-lg border-2 border-blue-500">
+                                <h4 class="text-xl font-bold text-blue-300 mb-2">V1 (Base Form)</h4>
+                                <p class="text-xs text-gray-400 mb-3">Bentuk dasar/dictionary</p>
+                                <div class="space-y-2 text-sm">
+                                    <div class="p-2 bg-black/30 rounded">
+                                        <span class="text-blue-400">Simple Present:</span>
+                                        <p>I <span class="highlight">go</span> to school.</p>
+                                    </div>
+                                    <div class="p-2 bg-black/30 rounded">
+                                        <span class="text-blue-400">Infinitive:</span>
+                                        <p>I want <span class="highlight">to go</span>.</p>
+                                    </div>
+                                    <div class="p-2 bg-black/30 rounded">
+                                        <span class="text-blue-400">Imperative:</span>
+                                        <p><span class="highlight">Go</span> away!</p>
+                                    </div>
+                                    <div class="p-2 bg-black/30 rounded">
+                                        <span class="text-blue-400">Modal:</span>
+                                        <p>I can <span class="highlight">go</span>.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-purple-900/40 p-4 rounded-lg border-2 border-purple-500">
+                                <h4 class="text-xl font-bold text-purple-300 mb-2">V2 (Past Tense)</h4>
+                                <p class="text-xs text-gray-400 mb-3">Simple Past (aktif)</p>
+                                <div class="space-y-2 text-sm">
+                                    <div class="p-2 bg-black/30 rounded">
+                                        <span class="text-purple-400">Regular:</span>
+                                        <p>walk → walked</p>
+                                        <p>play → played</p>
+                                    </div>
+                                    <div class="p-2 bg-black/30 rounded">
+                                        <span class="text-purple-400">Irregular:</span>
+                                        <p>go → went</p>
+                                        <p>eat → ate</p>
+                                        <p>see → saw</p>
+                                    </div>
+                                    <div class="p-2 bg-green-900/30 rounded border border-green-500/30">
+                                        <span class="text-green-400">Penggunaan:</span>
+                                        <p>I <span class="highlight">went</span> to Bali yesterday.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-green-900/40 p-4 rounded-lg border-2 border-green-500">
+                                <h4 class="text-xl font-bold text-green-300 mb-2">V3 (Past Participle)</h4>
+                                <p class="text-xs text-gray-400 mb-3">Perfect & Passive</p>
+                                <div class="space-y-2 text-sm">
+                                    <div class="p-2 bg-black/30 rounded">
+                                        <span class="text-green-400">Regular:</span>
+                                        <p>walk → walked</p>
+                                        <p>watch → watched</p>
+                                    </div>
+                                    <div class="p-2 bg-black/30 rounded">
+                                        <span class="text-green-400">Irregular:</span>
+                                        <p>go → gone</p>
+                                        <p>eat → eaten</p>
+                                        <p>see → seen</p>
+                                    </div>
+                                    <div class="p-2 bg-blue-900/30 rounded border border-blue-500/30">
+                                        <span class="text-blue-400">Perfect:</span>
+                                        <p>I have <span class="highlight">gone</span>.</p>
+                                    </div>
+                                    <div class="p-2 bg-red-900/30 rounded border border-red-500/30">
+                                        <span class="text-red-400">Passive:</span>
+                                        <p>The cake was <span class="highlight">eaten</span>.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="formula-box p-5 rounded-lg mb-6">
+                            <h5 class="font-bold text-yellow-400 mb-3">📋 Tabel Irregular Verbs Populer:</h5>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                                <div class="bg-black/30 p-2 rounded">
+                                    <p class="text-blue-400">V1 → V2 → V3</p>
+                                    <p class="mt-1">go → went → gone</p>
+                                    <p>eat → ate → eaten</p>
+                                    <p>see → saw → seen</p>
+                                    <p>take → took → taken</p>
+                                </div>
+                                <div class="bg-black/30 p-2 rounded">
+                                    <p class="text-blue-400">V1 → V2 → V3</p>
+                                    <p class="mt-1">write → wrote → written</p>
+                                    <p>give → gave → given</p>
+                                    <p>break → broke → broken</p>
+                                    <p>choose → chose → chosen</p>
+                                </div>
+                                <div class="bg-black/30 p-2 rounded">
+                                    <p class="text-blue-400">V1 → V2 → V3</p>
+                                    <p class="mt-1">begin → began → begun</p>
+                                    <p>drink → drank → drunk</p>
+                                    <p>swim → swam → swum</p>
+                                    <p>sing → sang → sung</p>
+                                </div>
+                                <div class="bg-black/30 p-2 rounded">
+                                    <p class="text-blue-400">V1 = V2 = V3</p>
+                                    <p class="mt-1">cut → cut → cut</p>
+                                    <p>put → put → put</p>
+                                    <p>shut → shut → shut</p>
+                                    <p>hurt → hurt → hurt</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-red-900/20 p-4 rounded-lg border border-red-500/30">
+                            <h5 class="font-bold text-red-400 mb-2">⚠️ Perbedaan V2 dan V3:</h5>
+                            <div class="grid md:grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <p class="text-purple-400 font-bold">V2 (Past Simple):</p>
+                                    <ul class="text-gray-300 space-y-1 mt-1">
+                                        <li>• Tunggal, tidak perlu auxiliary</li>
+                                        <li>• Waktu lampau spesifik</li>
+                                        <li>• Aktif voice</li>
+                                        <li>• Contoh: She <span class="highlight">wrote</span> a letter.</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <p class="text-green-400 font-bold">V3 (Past Participle):</p>
+                                    <ul class="text-gray-300 space-y-1 mt-1">
+                                        <li>• Selalu butuh auxiliary verb</li>
+                                        <li>• Perfect tenses & Passive voice</li>
+                                        <li>• Sebagai adjective</li>
+                                        <li>• Contoh: She has <span class="highlight">written</span> a letter.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="v-quiz" class="tab-content hidden">
+                    <div class="glass-panel chrome-border rounded-2xl p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-xl font-bold text-blue-300">Latihan V1, V2, V3</h4>
+                            <span class="text-sm text-gray-400">Soal <span id="v-current">1</span>/20</span>
+                        </div>
+                        <div id="v-question-container" class="mb-6"></div>
+                        <div id="v-result" class="hidden text-center py-8">
+                            <div class="text-4xl font-bold mb-2" id="v-score"></div>
+                            <p class="text-gray-400 mb-4" id="v-message"></p>
+                            <button onclick="restartQuiz('v')" class="chrome-btn px-6 py-2 rounded-lg">Ulangi Latihan</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 8: Active Passive Voice -->
+        <div class="slide" data-slide="8">
+            <div class="pt-20 pb-32 px-4 max-w-6xl mx-auto">
+                <div class="text-center mb-8">
+                    <h2 class="title-font text-4xl font-bold chrome-text mb-2">MATERI 7</h2>
+                    <h3 class="text-3xl font-bold text-blue-400">Active & Passive Voice</h3>
+                    <p class="text-gray-400 mt-2">Mengubah fokus pelaku dalam kalimat</p>
+                </div>
+
+                <div class="flex gap-4 mb-6 justify-center flex-wrap">
+                    <button onclick="showTab('ap-material')" class="tab-btn active px-6 py-2 rounded-lg border border-blue-500/30 bg-blue-900/20">Materi</button>
+                    <button onclick="showTab('ap-quiz')" class="tab-btn px-6 py-2 rounded-lg border border-blue-500/30 bg-blue-900/20">Latihan (20 Soal)</button>
+                </div>
+
+                <div id="ap-material" class="tab-content">
+                    <div class="glass-panel chrome-border rounded-2xl p-6 content-section">
+                        <div class="grid md:grid-cols-2 gap-6 mb-6">
+                            <div class="bg-blue-900/30 p-5 rounded-lg border-2 border-blue-500">
+                                <h4 class="text-2xl font-bold text-blue-300 mb-3">ACTIVE VOICE</h4>
+                                <p class="text-gray-300 mb-3">Subjek MELAKUKAN aksi (fokus pada pelaku).</p>
+                                
+                                <div class="formula-box p-3 rounded mb-3 text-sm">
+                                    <span class="text-blue-400">Formula:</span> S + V + O
+                                </div>
+                                
+                                <div class="space-y-2 text-sm">
+                                    <div class="p-2 bg-black/30 rounded">
+                                        <p class="text-green-400">The chef <span class="highlight">cooks</span> the meal.</p>
+                                        <p class="text-xs text-gray-500">Si chef memasak makanan.</p>
+                                    </div>
+                                    <div class="p-2 bg-black/30 rounded">
+                                        <p class="text-green-400">She <span class="highlight">wrote</span> a novel.</p>
+                                        <p class="text-xs text-gray-500">Dia menulis novel.</p>
+                                    </div>
+                                    <div class="p-2 bg-black/30 rounded">
+                                        <p class="text-green-400">They <span class="highlight">are building</span> a house.</p>
+                                        <p class="text-xs text-gray-500">Mereka sedang membangun rumah.</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-3 p-2 bg-blue-950/50 rounded text-xs">
+                                    <span class="text-blue-400">Gunakan ketika:</span> Fokus pada pelaku, informasi langsung, perintah.
+                                </div>
+                            </div>
+
+                            <div class="bg-purple-900/30 p-5 rounded-lg border-2 border-purple-500">
+                                <h4 class="text-2xl font-bold text-purple-300 mb-3">PASSIVE VOICE</h4>
+                                <p class="text-gray-300 mb-3">Subjek DILAKUKI aksi (fokus pada objek/penerima).</p>
+                                
+                                <div class="formula-box p-3 rounded mb-3 text-sm">
+                                    <span class="text-purple-400">Formula:</span> S + to be + V3 + (by agent)
+                                </div>
+                                
+                                <div class="space-y-2 text-sm">
+                                    <div class="p-2 bg-black/30 rounded">
+                                        <p class="text-green-400">The meal <span class="highlight">is cooked</span> by the chef.</p>
+                                        <p class="text-xs text-gray-500">Makanan dimasak oleh chef.</p>
+                                    </div>
+                                    <div class="p-2 bg-black/30 rounded">
+                                        <p class="text-green-400">A novel <span class="highlight">was written</span> by her.</p>
+                                        <p class="text-xs text-gray-500">Novel ditulis olehnya.</p>
+                                    </div>
+                                    <div class="p-2 bg-black/30 rounded">
+                                        <p class="text-green-400">A house <span class="highlight">is being built</span> by them.</p>
+                                        <p class="text-xs text-gray-500">Rumah sedang dibangun oleh mereka.</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-3 p-2 bg-purple-950/50 rounded text-xs">
+                                    <span class="text-purple-400">Gunakan ketika:</span> Fokus pada hasil, pelaku tidak penting/unknown, formal writing.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="formula-box p-5 rounded-lg mb-6">
+                            <h5 class="font-bold text-yellow-400 mb-3">🔄 Rumus Perubahan Active → Passive:</h5>
+                            <div class="space-y-3 text-sm">
+                                <div class="grid grid-cols-3 gap-2 items-center">
+                                    <div class="text-right text-blue-400">Active:</div>
+                                    <div class="col-span-2">Subject (doer) + Verb + Object (receiver)</div>
+                                </div>
+                                <div class="text-center text-gray-500">↓</div>
+                                <div class="grid grid-cols-3 gap-2 items-center">
+                                    <div class="text-right text-purple-400">Passive:</div>
+                                    <div class="col-span-2">Object (receiver) + to be + V3 + by + Subject (doer)</div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4 grid md:grid-cols-2 gap-4">
+                                <div class="bg-black/30 p-3 rounded">
+                                    <p class="text-xs text-gray-400 mb-1">Simple Present:</p>
+                                    <p class="text-blue-400">She eats apple.</p>
+                                    <p class="text-purple-400">Apple is eaten by her.</p>
+                                </div>
+                                <div class="bg-black/30 p-3 rounded">
+                                    <p class="text-xs text-gray-400 mb-1">Present Continuous:</p>
+                                    <p class="text-blue-400">She is eating apple.</p>
+                                    <p class="text-purple-400">Apple is being eaten by her.</p>
+                                </div>
+                                <div class="bg-black/30 p-3 rounded">
+                                    <p class="text-xs text-gray-400 mb-1">Simple Past:</p>
+                                    <p class="text-blue-400">She ate apple.</p>
+                                    <p class="text-purple-400">Apple was eaten by her.</p>
+                                </div>
+                                <div class="bg-black/30 p-3 rounded">
+                                    <p class="text-xs text-gray-400 mb-1">Present Perfect:</p>
+                                    <p class="text-blue-400">She has eaten apple.</p>
+                                    <p class="text-purple-400">Apple has been eaten by her.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-red-900/20 p-4 rounded-lg border border-red-500/30">
+                            <h5 class="font-bold text-red-400 mb-2">⚠️ Catatan Penting:</h5>
+                            <ul class="text-sm space-y-1 text-gray-300">
+                                <li>• Hanya transitive verbs (punya objek) yang bisa diubah passive</li>
+                                <li>• "By + agent" bisa dihilangkan jika pelaku tidak penting</li>
+                                <li>• Modal verbs: can be V3, must be V3, should be V3</li>
+                                <li>• Intransitive verbs (sleep, arrive, happen) tidak bisa passive!</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="ap-quiz" class="tab-content hidden">
+                    <div class="glass-panel chrome-border rounded-2xl p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-xl font-bold text-blue-300">Latihan Active & Passive Voice</h4>
+                            <span class="text-sm text-gray-400">Soal <span id="ap-current">1</span>/20</span>
+                        </div>
+                        <div id="ap-question-container" class="mb-6"></div>
+                        <div id="ap-result" class="hidden text-center py-8">
+                            <div class="text-4xl font-bold mb-2" id="ap-score"></div>
+                            <p class="text-gray-400 mb-4" id="ap-message"></p>
+                            <button onclick="restartQuiz('ap')" class="chrome-btn px-6 py-2 rounded-lg">Ulangi Latihan</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 9: Helping Verb -->
+        <div class="slide" data-slide="9">
+            <div class="pt-20 pb-32 px-4 max-w-6xl mx-auto">
+                <div class="text-center mb-8">
+                    <h2 class="title-font text-4xl font-bold chrome-text mb-2">MATERI 8</h2>
+                    <h3 class="text-3xl font-bold text-blue-400">Helping Verb (Auxiliary)</h3>
+                    <p class="text-gray-400 mt-2">Kata kerja pembantu yang membentuk tenses dan modals</p>
+                </div>
+
+                <div class="flex gap-4 mb-6 justify-center flex-wrap">
+                    <button onclick="showTab('hv-material')" class="tab-btn active px-6 py-2 rounded-lg border border-blue-500/30 bg-blue-900/20">Materi</button>
+                    <button onclick="showTab('hv-quiz')" class="tab-btn px-6 py-2 rounded-lg border border-blue-500/30 bg-blue-900/20">Latihan (20 Soal)</button>
+                </div>
+
+                <div id="hv-material" class="tab-content">
+                    <div class="glass-panel chrome-border rounded-2xl p-6 content-section">
+                        <div class="mb-6">
+                            <h4 class="text-xl font-bold text-blue-300 mb-4">Primary Auxiliaries (Be, Have, Do)</h4>
+                            <div class="grid md:grid-cols-3 gap-4">
+                                <div class="bg-blue-900/30 p-4 rounded border border-blue-500/30">
+                                    <h5 class="font-bold text-blue-400 mb-2">BE (am/is/are/was/were/been/being)</h5>
+                                    <ul class="text-sm space-y-1 text-gray-300">
+                                        <li>• <span class="text-blue-400">Continuous:</span> is playing</li>
+                                        <li>• <span class="text-blue-400">Passive:</span> was eaten</li>
+                                        <li>• <span class="text-blue-400">Adjective:</span> is happy</li>
+                                        <li>• <span class="text-blue-400">Location:</span> are here</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-purple-900/30 p-4 rounded border border-purple-500/30">
+                                    <h5 class="font-bold text-purple-400 mb-2">HAVE (have/has/had)</h5>
+                                    <ul class="text-sm space-y-1 text-gray-300">
+                                        <li>• <span class="text-purple-400">Perfect:</span> have gone</li>
+                                        <li>• <span class="text-purple-400">Perfect Cont:</span> has been playing</li>
+                                        <li>• <span class="text-purple-400">Possession:</span> have a car</li>
+                                        <li>• <span class="text-purple-400">Causative:</span> have it done</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-green-900/30 p-4 rounded border border-green-500/30">
+                                    <h5 class="font-bold text-green-400 mb-2">DO (do/does/did)</h5>
+                                    <ul class="text-sm space-y-1 text-gray-300">
+                                        <li>• <span class="text-green-400">Negatif:</span> do not go</li>
+                                        <li>• <span class="text-green-400">Interogatif:</span> Do you...?</li>
+                                        <li>• <span class="text-green-400">Emphasis:</span> I do love you!</li>
+                                        <li>• <span class="text-green-400">Avoid rept:</span> I like it, so do I</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <h4 class="text-xl font-bold text-yellow-300 mb-4">Modal Auxiliaries (Modals)</h4>
+                            <p class="text-gray-300 mb-3">Tidak berubah bentuk (no -s, -ing, -ed) diikuti V1.</p>
+                            
+                            <div class="grid md:grid-cols-4 gap-3 text-sm">
+                                <div class="bg-yellow-900/20 p-3 rounded border border-yellow-500/30">
+                                    <h6 class="font-bold text-yellow-400">Ability</h6>
+                                    <p class="text-gray-300">can, could</p>
+                                    <p class="text-xs text-gray-500 mt-1">I can swim.</p>
+                                </div>
+                                <div class="bg-orange-900/20 p-3 rounded border border-orange-500/30">
+                                    <h6 class="font-bold text-orange-400">Permission</h6>
+                                    <p class="text-gray-300">may, can, could</p>
+                                    <p class="text-xs text-gray-500 mt-1">You may go.</p>
+                                </div>
+                                <div class="bg-red-900/20 p-3 rounded border border-red-500/30">
+                                    <h6 class="font-bold text-red-400">Obligation</h6>
+                                    <p class="text-gray-300">must, have to, should</p>
+                                    <p class="text-xs text-gray-500 mt-1">You must study.</p>
+                                </div>
+                                <div class="bg-pink-900/20 p-3 rounded border border-pink-500/30">
+                                    <h6 class="font-bold text-pink-400">Possibility</h6>
+                                    <p class="text-gray-300">may, might, could</p>
+                                    <p class="text-xs text-gray-500 mt-1">It may rain.</p>
+                                </div>
+                                <div class="bg-indigo-900/20 p-3 rounded border border-indigo-500/30">
+                                    <h6 class="font-bold text-indigo-400">Prediction</h6>
+                                    <p class="text-gray-300">will, shall</p>
+                                    <p class="text-xs text-gray-500 mt-1">It will happen.</p>
+                                </div>
+                                <div class="bg-cyan-900/20 p-3 rounded border border-cyan-500/30">
+                                    <h6 class="font-bold text-cyan-400">Advice</h6>
+                                    <p class="text-gray-300">should, ought to</p>
+                                    <p class="text-xs text-gray-500 mt-1">You should rest.</p>
+                                </div>
+                                <div class="bg-teal-900/20 p-3 rounded border border-teal-500/30">
+                                    <h6 class="font-bold text-teal-400">Intention</h6>
+                                    <p class="text-gray-300">will, would</p>
+                                    <p class="text-xs text-gray-500 mt-1">I will help.</p>
+                                </div>
+                                <div class="bg-lime-900/20 p-3 rounded border border-lime-500/30">
+                                    <h6 class="font-bold text-lime-400">Habit</h6>
+                                    <p class="text-gray-300">would, used to</p>
+                                    <p class="text-xs text-gray-500 mt-1">I would play.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="formula-box p-4 rounded-lg">
+                            <h5 class="font-bold text-cyan-400 mb-2">🔍 Cara Identifikasi Helping Verb:</h5>
+                            <ol class="list-decimal list-inside space-y-1 text-sm text-gray-300">
+                                <li>Jika ada dua verb atau lebih, yang pertama adalah helping verb</li>
+                                <li>Helping verb selalu diikuti main verb (kecuali short answer)</li>
+                                <li>Modal selalu diikuti V1 (base form)</li>
+                                <li>Have diikuti V3, Be diikuti V-ing atau V3</li>
+                            </ol>
+                            <div class="mt-3 grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                                <div class="bg-black/30 p-2 rounded text-center">
+                                    <span class="text-blue-400">is</span> + <span class="text-green-400">playing</span>
+                                </div>
+                                <div class="bg-black/30 p-2 rounded text-center">
+                                    <span class="text-blue-400">has</span> + <span class="text-green-400">eaten</span>
+                                </div>
+                                <div class="bg-black/30 p-2 rounded text-center">
+                                    <span class="text-blue-400">does</span> + <span class="text-green-400">not go</span>
+                                </div>
+                                <div class="bg-black/30 p-2 rounded text-center">
+                                    <span class="text-blue-400">can</span> + <span class="text-green-400">swim</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="hv-quiz" class="tab-content hidden">
+                    <div class="glass-panel chrome-border rounded-2xl p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-xl font-bold text-blue-300">Latihan Helping Verb</h4>
+                            <span class="text-sm text-gray-400">Soal <span id="hv-current">1</span>/20</span>
+                        </div>
+                        <div id="hv-question-container" class="mb-6"></div>
+                        <div id="hv-result" class="hidden text-center py-8">
+                            <div class="text-4xl font-bold mb-2" id="hv-score"></div>
+                            <p class="text-gray-400 mb-4" id="hv-message"></p>
+                            <button onclick="restartQuiz('hv')" class="chrome-btn px-6 py-2 rounded-lg">Ulangi Latihan</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 10: Tenses -->
+        <div class="slide" data-slide="10">
+            <div class="pt-20 pb-32 px-4 max-w-6xl mx-auto">
+                <div class="text-center mb-8">
+                    <h2 class="title-font text-4xl font-bold chrome-text mb-2">MATERI 9</h2>
+                    <h3 class="text-3xl font-bold text-blue-400">Cara Mudah Memahami Tenses</h3>
+                    <p class="text-gray-400 mt-2">Formula dan pola waktu yang sistematis</p>
+                </div>
+
+                <div class="flex gap-4 mb-6 justify-center flex-wrap">
+                    <button onclick="showTab('ten-material')" class="tab-btn active px-6 py-2 rounded-lg border border-blue-500/30 bg-blue-900/20">Materi</button>
+                    <button onclick="showTab('ten-quiz')" class="tab-btn px-6 py-2 rounded-lg border border-blue-500/30 bg-blue-900/20">Latihan (20 Soal)</button>
+                </div>
+
+                <div id="ten-material" class="tab-content">
+                    <div class="glass-panel chrome-border rounded-2xl p-6 content-section">
+                        <div class="formula-box p-4 rounded-lg mb-6 text-center">
+                            <h4 class="text-xl font-bold text-yellow-400 mb-2">🧠 RUMUS MASTER TENSES</h4>
+                            <p class="text-lg">Tenses = <span class="text-blue-400">Waktu</span> (Present/Past/Future) + <span class="text-purple-400">Aspek</span> (Simple/Continuous/Perfect/Perfect Cont)</p>
+                        </div>
+
+                        <div class="grid md:grid-cols-3 gap-4 mb-6">
+                            <div class="bg-blue-900/30 p-4 rounded border border-blue-500/30">
+                                <h5 class="font-bold text-blue-400 mb-3 text-center">SIMPLE</h5>
+                                <p class="text-xs text-gray-400 mb-2 text-center">Fakta, kebiasaan, rutinitas</p>
+                                <div class="space-y-2 text-xs">
+                                    <div class="p-2 bg-black/30 rounded">
+                                        <span class="text-blue-400">Simple Present:</span>
+                                        <p>S + V1/V1+s</p>
+                                        <p class="text-green-400 mt-1">I eat. She eats.</p>
+                                    </div>
+                                    <div class="p-2 bg-black/30 rounded">
+                                        <span class="text-blue-400">Simple Past:</span>
+                                        <p>S + V2</p>
+                                        <p class="text-green-400 mt-1">I ate.</p>
+                                    </div>
+                                    <div class="p-2 bg-black/30 rounded">
+                                        <span class="text-blue-400">Simple Future:</span>
+                                        <p>S + will + V1</p>
+                                        <p class="text-green-400 mt-1">I will eat.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-purple-900/30 p-4 rounded border border-purple-500/30">
+                                <h5 class="font-bold text-purple-400 mb-3 text-center">CONTINUOUS</h5>
+                                <p class="text-xs text-gray-400 mb-2 text-center">Sedang berlangsung</p>
+                                <div class="space-y-2 text-xs">
+                                    <div class="p-2 bg-black/30 rounded">
+                                        <span class="text-purple-400">Present Cont:</span>
+                                        <p>S + am/is/are + V-ing</p>
+                                        <p class="text-green-400 mt-1">I am eating.</p>
+                                    </div>
+                                    <div class="p-2 bg-black/30 rounded">
+                                        <span class="text-purple-400">Past Cont:</span>
+                                        <p>S + was/were + V-ing</p>
+                                        <p class="text-green-400 mt-1">I was eating.</p>
+                                    </div>
+                                    <div class="p-2 bg-black/30 rounded">
+                                        <span class="text-purple-400">Future Cont:</span>
+                                        <p>S + will be + V-ing</p>
+                                        <p class="text-green-400 mt-1">I will be eating.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-green-900/30 p-4 rounded border border-green-500/30">
+                                <h5 class="font-bold text-green-400 mb-3 text-center">PERFECT</h5>
+                                <p class="text-xs text-gray-400 mb-2 text-center">Sudah selesai</p>
+                                <div class="space-y-2 text-xs">
+                                    <div class="p-2 bg-black/30 rounded">
+                                        <span class="text-green-400">Present Perfect:</span>
+                                        <p>S + have/has + V3</p>
+                                        <p class="text-green-400 mt-1">I have eaten.</p>
+                                    </div>
+                                    <div class="p-2 bg-black/30 rounded">
+                                        <span class="text-green-400">Past Perfect:</span>
+                                        <p>S + had + V3</p>
+                                        <p class="text-green-400 mt-1">I had eaten.</p>
+                                    </div>
+                                    <div class="p-2 bg-black/30 rounded">
+                                        <span class="text-green-400">Future Perfect:</span>
+                                        <p>S + will have + V3</p>
+                                        <p class="text-green-400 mt-1">I will have eaten.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-orange-900/20 p-4 rounded-lg border border-orange-500/30 mb-6">
+                            <h5 class="font-bold text-orange-400 mb-3">Perfect Continuous (Sedang + Sudah lama)</h5>
+                            <div class="grid md:grid-cols-3 gap-3 text-xs">
+                                <div class="p-2 bg-black/30 rounded">
+                                    <span class="text-orange-400">Present Perf Cont:</span>
+                                    <p>S + have/has been + V-ing</p>
+                                    <p class="text-green-400 mt-1">I have been eating (for 2 hours).</p>
+                                </div>
+                                <div class="p-2 bg-black/30 rounded">
+                                    <span class="text-orange-400">Past Perf Cont:</span>
+                                    <p>S + had been + V-ing</p>
+                                    <p class="text-green-400 mt-1">I had been eating (before you came).</p>
+                                </div>
+                                <div class="p-2 bg-black/30 rounded">
+                                    <span class="text-orange-400">Future Perf Cont:</span>
+                                    <p>S + will have been + V-ing</p>
+                                    <p class="text-green-400 mt-1">I will have been eating (for 2 hours by then).</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="formula-box p-4 rounded">
+                                <h5 class="font-bold text-yellow-400 mb-2">📊 Time Signals:</h5>
+                                <ul class="text-sm space-y-1 text-gray-300">
+                                    <li><span class="text-blue-400">Simple Present:</span> every day, usually, often, always</li>
+                                    <li><span class="text-blue-400">Present Cont:</span> now, right now, at the moment</li>
+                                    <li><span class="text-blue-400">Simple Past:</span> yesterday, last week, ago, in 1990</li>
+                                    <li><span class="text-blue-400">Present Perfect:</span> already, yet, since, for, ever, never</li>
+                                    <li><span class="text-blue-400">Past Perfect:</span> before, after, when, by the time</li>
+                                    <li><span class="text-blue-400">Future:</span> tomorrow, next week, soon, later</li>
+                                </ul>
+                            </div>
+                            <div class="bg-red-900/20 p-4 rounded border border-red-500/30">
+                                <h5 class="font-bold text-red-400 mb-2">🎯 Tips Menghafal:</h5>
+                                <ol class="text-sm space-y-1 text-gray-300 list-decimal list-inside">
+                                    <li>Hafalkan pola: S + (aux) + (aux2) + Verb</li>
+                                    <li>Simple = V1/V2/will+V1</li>
+                                    <li>Continuous = be + V-ing</li>
+                                    <li>Perfect = have + V3</li>
+                                    <li>Gabungkan: Perfect Continuous = have been + V-ing</li>
+                                    <li>Perhatikan time signals dalam soal!</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="ten-quiz" class="tab-content hidden">
+                    <div class="glass-panel chrome-border rounded-2xl p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-xl font-bold text-blue-300">Latihan Tenses</h4>
+                            <span class="text-sm text-gray-400">Soal <span id="ten-current">1</span>/20</span>
+                        </div>
+                        <div id="ten-question-container" class="mb-6"></div>
+                        <div id="ten-result" class="hidden text-center py-8">
+                            <div class="text-4xl font-bold mb-2" id="ten-score"></div>
+                            <p class="text-gray-400 mb-4" id="ten-message"></p>
+                            <button onclick="restartQuiz('ten')" class="chrome-btn px-6 py-2 rounded-lg">Ulangi Latihan</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 11: Conditional, Subjunctive, Inverted -->
+        <div class="slide" data-slide="11">
+            <div class="pt-20 pb-32 px-4 max-w-6xl mx-auto">
+                <div class="text-center mb-8">
+                    <h2 class="title-font text-4xl font-bold chrome-text mb-2">MATERI 10</h2>
+                    <h3 class="text-3xl font-bold text-blue-400">Conditional, Subjunctive, Inverted</h3>
+                    <p class="text-gray-400 mt-2">Struktur kalimat kompleks tingkat lanjut</p>
+                </div>
+
+                <div class="flex gap-4 mb-6 justify-center flex-wrap">
+                    <button onclick="showTab('csi-material')" class="tab-btn active px-6 py-2 rounded-lg border border-blue-500/30 bg-blue-900/20">Materi</button>
+                    <button onclick="showTab('csi-quiz')" class="tab-btn px-6 py-2 rounded-lg border border-blue-500/30 bg-blue-900/20">Latihan (20 Soal)</button>
+                </div>
+
+                <div id="csi-material" class="tab-content">
+                    <div class="glass-panel chrome-border rounded-2xl p-6 content-section">
+                        <div class="mb-6">
+                            <h4 class="text-2xl font-bold text-blue-300 mb-4">🎲 Conditional Sentences (If Clause)</h4>
+                            <div class="grid md:grid-cols-4 gap-3 text-xs">
+                                <div class="bg-green-900/30 p-3 rounded border border-green-500/30">
+                                    <h5 class="font-bold text-green-400 mb-2">Type 0 (General Truth)</h5>
+                                    <p class="text-gray-400 mb-1">If + S + V1, S + V1</p>
+                                    <p class="text-green-400">If you heat ice, it melts.</p>
+                                </div>
+                                <div class="bg-blue-900/30 p-3 rounded border border-blue-500/30">
+                                    <h5 class="font-bold text-blue-400 mb-2">Type 1 (Real Future)</h5>
+                                    <p class="text-gray-400 mb-1">If + S + V1, S + will V1</p>
+                                    <p class="text-blue-400">If it rains, I will stay.</p>
+                                </div>
+                                <div class="bg-purple-900/30 p-3 rounded border border-purple-500/30">
+                                    <h5 class="font-bold text-purple-400 mb-2">Type 2 (Unreal Now)</h5>
+                                    <p class="text-gray-400 mb-1">If + S + V2, S + would V1</p>
+                                    <p class="text-purple-400">If I were rich, I would buy it.</p>
+                                </div>
+                                <div class="bg-red-900/30 p-3 rounded border border-red-500/30">
+                                    <h5 class="font-bold text-red-400 mb-2">Type 3 (Unreal Past)</h5>
+                                    <p class="text-gray-400 mb-1">If + S + had V3, S + would have V3</p>
+                                    <p class="text-red-400">If I had known, I would have come.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <h4 class="text-2xl font-bold text-yellow-300 mb-4">💭 Subjunctive Mood</h4>
+                            <p class="text-gray-300 mb-3">Mengungkapkan harapan, saran, pentingnya, atau situasi tidak nyata. Menggunakan <span class="highlight">V1 (base form)</span> untuk semua subjek!</p>
+                            
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="bg-yellow-900/20 p-4 rounded border border-yellow-500/30">
+                                    <h5 class="font-bold text-yellow-400 mb-2">After "That" (Sugest, Demand, etc)</h5>
+                                    <ul class="text-sm space-y-1 text-gray-300">
+                                        <li>I suggest that he <span class="highlight">study</span> harder. (bukan studies)</li>
+                                        <li>It is important that she <span class="highlight">be</span> here. (bukan is)</li>
+                                        <li>The doctor ordered that I <span class="highlight">take</span> medicine.</li>
+                                    </ul>
+                                    <p class="text-xs text-gray-500 mt-2">Kata kunci: suggest, demand, require, important, essential, necessary, order, propose</p>
+                                </div>
+                                <div class="bg-orange-900/20 p-4 rounded border border-orange-500/30">
+                                    <h5 class="font-bold text-orange-400 mb-2">Wish / If Only / As If</h5>
+                                    <ul class="text-sm space-y-1 text-gray-300">
+                                        <li>I wish I <span class="highlight">were</span> rich. (now - Type 2)</li>
+                                        <li>I wish I <span class="highlight">had studied</span>. (past - Type 3)</li>
+                                        <li>He acts as if he <span class="highlight">knew</span> everything.</li>
+                                        <li>If only I <span class="highlight">were</span> taller!</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <h4 class="text-2xl font-bold text-pink-300 mb-4">🔄 Inverted Sentence (Subject-Verb Balik)</h4>
+                            <p class="text-gray-300 mb-3">Verb/auxiliary diletakkan sebelum subject untuk emphasis atau formal writing.</p>
+                            
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="bg-pink-900/20 p-4 rounded border border-pink-500/30">
+                                    <h5 class="font-bold text-pink-400 mb-2">Negative Adverbs di Awal</h5>
+                                    <p class="text-xs text-gray-400 mb-2">Never, seldom, rarely, hardly, barely, no sooner, scarcely</p>
+                                    <ul class="text-sm space-y-1 text-gray-300">
+                                        <li><span class="highlight">Never</span> have I seen such beauty.</li>
+                                        <li><span class="highlight">Seldom</span> does he come late.</li>
+                                        <li><span class="highlight">Hardly</span> had I arrived when it rained.</li>
+                                        <li><span class="highlight">No sooner</span> had I left than he called.</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-indigo-900/20 p-4 rounded border border-indigo-500/30">
+                                    <h5 class="font-bold text-indigo-400 mb-2">Conditional Inversion</h5>
+                                    <p class="text-xs text-gray-400 mb-2">Tanpa "if", menggunakan "were, had, should"</p>
+                                    <ul class="text-sm space-y-1 text-gray-300">
+                                        <li><span class="highlight">Were</span> I rich, I would buy it. (= If I were...)</li>
+                                        <li><span class="highlight">Had</span> I known, I would have come. (= If I had...)</li>
+                                        <li><span class="highlight">Should</span> you see him, tell him. (= If you should...)</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4 bg-cyan-900/20 p-4 rounded border border-cyan-500/30">
+                                <h5 class="font-bold text-cyan-400 mb-2">Lainnya:</h5>
+                                <div class="grid md:grid-cols-2 gap-2 text-sm">
+                                    <p>Here comes <span class="highlight">the bus</span>. (Here/There + verb + S)</p>
+                                    <p>Only then did I understand. (Only + time expression)</p>
+                                    <p>Not only is he smart, but also kind. (Not only... but also)</p>
+                                    <p>Such was the weather that we stayed. (Such + be + S)</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="formula-box p-4 rounded-lg">
+                            <h5 class="font-bold text-red-400 mb-2">⚠️ Catatan Penting:</h5>
+                            <ul class="text-sm space-y-1 text-gray-300">
+                                <li>• Subjunctive menggunakan V1 walaupun subject he/she/it (he go, she be)</li>
+                                <li>• Inversion selalu menggunakan auxiliary verb untuk simple tenses</li>
+                                <li>• "Were" digunakan untuk semua subjek dalam subjunctive (If I were, If he were)</li>
+                                <li>• Type 3 Conditional bisa diinvers: Had I known = If I had known</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="csi-quiz" class="tab-content hidden">
+                    <div class="glass-panel chrome-border rounded-2xl p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-xl font-bold text-blue-300">Latihan Conditional, Subjunctive, Inverted</h4>
+                            <span class="text-sm text-gray-400">Soal <span id="csi-current">1</span>/20</span>
+                        </div>
+                        <div id="csi-question-container" class="mb-6"></div>
+                        <div id="csi-result" class="hidden text-center py-8">
+                            <div class="text-4xl font-bold mb-2" id="csi-score"></div>
+                            <p class="text-gray-400 mb-4" id="csi-message"></p>
+                            <button onclick="restartQuiz('csi')" class="chrome-btn px-6 py-2 rounded-lg">Ulangi Latihan</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 12: Final Score -->
+        <div class="slide" data-slide="12">
+            <div class="min-h-screen flex flex-col items-center justify-center px-4">
+                <div class="glass-panel chrome-border rounded-3xl p-8 max-w-2xl w-full text-center">
+                    <h2 class="title-font text-4xl font-bold chrome-text mb-6">FINAL SCORE</h2>
+                    <p class="text-gray-400 mb-8">Total skor dari seluruh materi dan latihan</p>
+                    
+                    <div class="relative w-48 h-48 mx-auto mb-8">
+                        <div id="finalScoreCircle" class="absolute inset-0 rounded-full score-circle" style="--score-deg: 0deg"></div>
+                        <div class="absolute inset-2 bg-gray-900 rounded-full flex items-center justify-center">
+                            <div>
+                                <div id="finalScoreDisplay" class="text-5xl font-bold text-white">0</div>
+                                <div class="text-sm text-gray-400">/ 200</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="finalMessage" class="text-xl font-bold mb-8 text-blue-400"></div>
+
+                    <div class="grid grid-cols-2 gap-4 mb-8 text-sm">
+                        <div class="bg-blue-900/30 p-3 rounded border border-blue-500/30">
+                            <div class="text-gray-400">Part of Speech</div>
+                            <div id="score-pos" class="text-xl font-bold text-blue-300">0/20</div>
+                        </div>
+                        <div class="bg-blue-900/30 p-3 rounded border border-blue-500/30">
+                            <div class="text-gray-400">Personal Pronoun</div>
+                            <div id="score-pro" class="text-xl font-bold text-blue-300">0/20</div>
+                        </div>
+                        <div class="bg-blue-900/30 p-3 rounded border border-blue-500/30">
+                            <div class="text-gray-400">Subject Predicate</div>
+                            <div id="score-sp" class="text-xl font-bold text-blue-300">0/20</div>
+                        </div>
+                        <div class="bg-blue-900/30 p-3 rounded border border-blue-500/30">
+                            <div class="text-gray-400">Phrase vs Clause</div>
+                            <div id="score-pc" class="text-xl font-bold text-blue-300">0/20</div>
+                        </div>
+                        <div class="bg-blue-900/30 p-3 rounded border border-blue-500/30">
+                            <div class="text-gray-400">Verbal Nominal</div>
+                            <div id="score-vn" class="text-xl font-bold text-blue-300">0/20</div>
+                        </div>
+                        <div class="bg-blue-900/30 p-3 rounded border border-blue-500/30">
+                            <div class="text-gray-400">V1 V2 V3</div>
+                            <div id="score-v" class="text-xl font-bold text-blue-300">0/20</div>
+                        </div>
+                        <div class="bg-blue-900/30 p-3 rounded border border-blue-500/30">
+                            <div class="text-gray-400">Active Passive</div>
+                            <div id="score-ap" class="text-xl font-bold text-blue-300">0/20</div>
+                        </div>
+                        <div class="bg-blue-900/30 p-3 rounded border border-blue-500/30">
+                            <div class="text-gray-400">Helping Verb</div>
+                            <div id="score-hv" class="text-xl font-bold text-blue-300">0/20</div>
+                        </div>
+                        <div class="bg-blue-900/30 p-3 rounded border border-blue-500/30">
+                            <div class="text-gray-400">Tenses</div>
+                            <div id="score-ten" class="text-xl font-bold text-blue-300">0/20</div>
+                        </div>
+                        <div class="bg-blue-900/30 p-3 rounded border border-blue-500/30">
+                            <div class="text-gray-400">Cond/Subj/Inv</div>
+                            <div id="score-csi" class="text-xl font-bold text-blue-300">0/20</div>
+                        </div>
+                    </div>
+
+                    <button onclick="location.reload()" class="chrome-btn px-8 py-3 rounded-full text-lg">
+                        Mulai Ulang
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="fixed bottom-0 left-0 w-full bg-gray-900/90 backdrop-blur border-t border-gray-700 p-4 z-50">
+            <div class="max-w-6xl mx-auto flex justify-between items-center">
+                <button onclick="prevSlide()" id="prevBtn" class="nav-btn px-6 py-2 rounded-lg flex items-center gap-2 disabled:opacity-50" disabled>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    Previous
+                </button>
+                
+                <div class="flex gap-2">
+                    <span id="slideIndicator" class="text-gray-400 font-mono">1 / 12</span>
+                </div>
+
+                <button onclick="nextSlide()" id="nextBtn" class="nav-btn px-6 py-2 rounded-lg flex items-center gap-2">
+                    Next
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data Soal
+        const questions = {
+            pos: [
+                {q: "Identify the part of speech of 'beautiful' in: 'She has a beautiful voice.'", options: ["Noun", "Adjective", "Adverb", "Verb"], correct: 1},
+                {q: "What part of speech is 'quickly' in: 'He runs quickly.'?", options: ["Adjective", "Noun", "Adverb", "Preposition"], correct: 2},
+                {q: "Identify 'under' in: 'The cat is under the table.'", options: ["Noun", "Verb", "Adjective", "Preposition"], correct: 3},
+                {q: "What is 'and' in: 'I like tea and coffee.'?", options: ["Preposition", "Conjunction", "Adverb", "Interjection"], correct: 1},
+                {q: "'Wow!' expresses strong feeling. What part of speech is it?", options: ["Verb", "Noun", "Interjection", "Adjective"], correct: 2},
+                {q: "Identify 'happiness' in: 'Happiness is important.'", options: ["Abstract Noun", "Concrete Noun", "Adjective", "Verb"], correct: 0},
+                {q: "What part of speech is 'they'?", options: ["Noun", "Adjective", "Pronoun", "Adverb"], correct: 2},
+                {q: "'Sing' in 'They sing beautifully' is a:", options: ["Noun", "Verb", "Adjective", "Adverb"], correct: 1},
+                {q: "Identify 'the' in: 'The book is red.'", options: ["Article/Determiner", "Noun", "Verb", "Adjective"], correct: 0},
+                {q: "What is 'yesterday' in: 'I came yesterday.'?", options: ["Noun", "Adverb of time", "Preposition", "Adjective"], correct: 1},
+                {q: "'Because' in 'I stayed because I was tired' is:", options: ["Preposition", "Subordinating Conjunction", "Coordinating Conjunction", "Adverb"], correct: 1},
+                {q: "Identify 'books' in: 'The books are on the shelf.'", options: ["Verb", "Plural Noun", "Adjective", "Adverb"], correct: 1},
+                {q: "What part of speech is 'very' in 'very good'?", options: ["Adjective", "Adverb", "Noun", "Verb"], correct: 1},
+                {q: "'Oh no!' is an example of:", options: ["Verb", "Noun", "Interjection", "Preposition"], correct: 2},
+                {q: "Identify 'with' in: 'I go with him.'", options: ["Conjunction", "Preposition", "Adverb", "Noun"], correct: 1},
+                {q: "'Running' in 'Running is fun' is:", options: ["Verb", "Gerund (Noun)", "Adjective", "Adverb"], correct: 1},
+                {q: "What is 'but' in: 'I like him but not her.'?", options: ["Preposition", "Coordinating Conjunction", "Subordinating Conjunction", "Adverb"], correct: 1},
+                {q: "Identify 'her' in: 'This is her book.'", options: ["Pronoun", "Possessive Adjective", "Noun", "Verb"], correct: 1},
+                {q: "'Slowly' modifies:", options: ["Noun", "Verb", "Adjective", "Both B and C"], correct: 3},
+                {q: "What part of speech can function as subject, object, and complement?", options: ["Verb", "Adjective", "Noun", "Adverb"], correct: 2}
+            ],
+            pro: [
+                {q: "Choose the correct pronoun: '___ am a student.'", options: ["Me", "I", "My", "Mine"], correct: 1},
+                {q: "Select the correct object pronoun: 'She loves ___.'", options: ["he", "him", "his", "himself"], correct: 1},
+                {q: "Which is correct? 'This is ___ book.'", options: ["my", "mine", "me", "I"], correct: 0},
+                {q: "Choose: 'The book is ___.' (possessive pronoun)", options: ["my", "mine", "me", "I"], correct: 1},
+                {q: "Correct form: '___ and John went to school.'", options: ["Me", "I", "My", "Mine"], correct: 1},
+                {q: "Object pronoun for 'we':", options: ["us", "our", "ours", "we"], correct: 0},
+                {q: "Possessive adjective for 'they':", options: ["them", "their", "theirs", "they"], correct: 1},
+                {q: "Reflexive pronoun for 'she':", options: ["her", "hers", "herself", "she"], correct: 2},
+                {q: "Choose: 'Give it to ___.'", options: ["I", "me", "my", "mine"], correct: 1},
+                {q: "Correct: '___ house is big.'", options: ["They", "Them", "Their", "Theirs"], correct: 2},
+                {q: "Which is a subject pronoun?", options: ["him", "her", "he", "us"], correct: 2},
+                {q: "Select the possessive pronoun:", options: ["your", "yours", "you", "yourselves"], correct: 1},
+                {q: "Correct: 'The winner is ___.'", options: ["he", "him", "his", "himself"], correct: 1},
+                {q: "Demonstrative pronoun for things near:", options: ["this", "that", "these", "those"], correct: 0},
+                {q: "Relative pronoun for people:", options: ["which", "who", "that", "what"], correct: 1},
+                {q: "Indefinite pronoun:", options: ["everyone", "he", "she", "they"], correct: 0},
+                {q: "Reciprocal pronoun:", options: ["each other", "myself", "himself", "itself"], correct: 0},
+                {q: "Correct: '___ did this?' (interrogative)", options: ["Who", "Whom", "Whose", "Which"], correct: 0},
+                {q: "Object of preposition: 'Between you and ___.'", options: ["I", "me", "my", "mine"], correct: 1},
+                {q: "Emphatic pronoun: 'I ___ did it.'", options: ["me", "myself", "mine", "I"], correct: 1}
+            ],
+            sp: [
+                {q: "Identify the subject: 'The tall boy runs fast.'", options: ["The tall boy", "runs", "fast", "The"], correct: 0},
+                {q: "What is the simple predicate: 'The students are studying grammar.'?", options: ["The students", "are", "are studying", "studying grammar"], correct: 2},
+                {q: "Complete subject in: 'My old car in the garage needs repair.'", options: ["My old car", "My old car in the garage", "needs repair", "in the garage"], correct: 1},
+                {q: "Simple subject: 'John and Mary are coming.'", options: ["John and Mary", "are coming", "John", "Mary"], correct: 2},
+                {q: "In 'There is a book on the table', the subject is:", options: ["There", "is", "a book", "on the table"], correct: 2},
+                {q: "Predicate in: 'She sings beautifully.'", options: ["She", "sings", "sings beautifully", "beautifully"], correct: 2},
+                {q: "Subject of imperative sentence 'Close the door!':", options: ["You (implied)", "Close", "the door", "door"], correct: 0},
+                {q: "Compound predicate: 'He sings and dances.' The predicates are:", options: ["He", "sings", "dances", "sings and dances"], correct: 3},
+                {q: "Identify: 'Under the tree, the children are playing.' Subject is:", options: ["Under the tree", "the tree", "the children", "playing"], correct: 2},
+                {q: "Complete predicate: 'The cat sleeps on the sofa every day.'", options: ["The cat", "sleeps", "sleeps on the sofa every day", "on the sofa"], correct: 2},
+                {q: "Subject in question: 'Are you ready?'", options: ["Are", "you", "ready", "Are you"], correct: 1},
+                {q: "Simple subject: 'The big red expensive car stopped.'", options: ["The big red expensive car", "car", "stopped", "red"], correct: 1},
+                {q: "In 'It is raining', 'It' is:", options: ["Real subject", "Expletive/placeholder", "Object", "Predicate"], correct: 1},
+                {q: "Subject complement: 'She is a doctor.' The complement is:", options: ["She", "is", "a doctor", "doctor"], correct: 2},
+                {q: "Object of preposition is NEVER the:", options: ["Subject", "Object", "Complement", "Adverb"], correct: 0},
+                {q: "Find subject: 'Here comes the bus.'", options: ["Here", "comes", "the bus", "bus"], correct: 2},
+                {q: "Compound subject in: 'Apples and oranges are fruits.'", options: ["Apples", "Oranges", "Apples and oranges", "are fruits"], correct: 2},
+                {q: "Predicate nominative: 'He became a teacher.' 'A teacher' is:", options: ["Subject", "Object", "Subject complement", "Adverb"], correct: 2},
+                {q: "Subject in: 'Swimming is good exercise.'", options: ["Swimming", "is", "good exercise", "exercise"], correct: 0},
+                {q: "What is NOT part of the predicate?", options: ["Verb", "Object", "Subject", "Adverbial"], correct: 2}
+            ],
+            pc: [
+                {q: "Which is a PHRASE? (no subject-verb)", options: ["When I wake up", "Under the table", "She sings", "Because he left"], correct: 1},
+                {q: "Identify the CLAUSE: 'The book that I bought is good.'", options: ["The book", "that I bought", "is good", "The book that I bought"], correct: 1},
+                {q: "Noun phrase: 'The big red car is fast.' The noun phrase is:", options: ["The big red car", "is fast", "The big", "red car is fast"], correct: 0},
+                {q: "Which is a dependent clause?", options: ["I love you", "She sings", "When the rain stops", "The sun shines"], correct: 2},
+                {q: "Prepositional phrase: 'The book is on the table.' The prepositional phrase is:", options: ["The book", "is", "on the table", "the table"], correct: 2},
+                {q: "Independent clause can stand alone as:", options: ["Phrase", "Sentence", "Word", "Dependent"], correct: 1},
+                {q: "Adjective clause: 'The man who wears a hat is my uncle.' The adjective clause is:", options: ["The man", "who wears a hat", "is my uncle", "wears a hat"], correct: 1},
+                {q: "Which contains a gerund phrase?", options: ["To err is human", "Swimming is fun", "He wants to go", "Running fast, he won"], correct: 1},
+                {q: "Infinitive phrase: 'I want to eat now.' The infinitive phrase is:", options: ["I want", "to eat", "to eat now", "now"], correct: 2},
+                {q: "Adverb clause: 'I will go if it stops raining.' The adverb clause is:", options: ["I will go", "if it stops raining", "it stops", "raining"], correct: 1},
+                {q: "Participial phrase: 'Running fast, he won the race.' 'Running fast' is:", options: ["Gerund phrase", "Participial phrase", "Infinitive phrase", "Prepositional phrase"], correct: 1},
+                {q: "Which is NOT a clause?", options: ["After I left", "Because she sings", "In the morning", "When he arrives"], correct: 2},
+                {q: "Noun clause: 'I know that he is right.' The noun clause is:", options: ["I know", "that he is right", "he is right", "is right"], correct: 1},
+                {q: "Verb phrase: 'She has been working hard.' The verb phrase is:", options: ["She", "has been working", "working hard", "has been"], correct: 1},
+                {q: "Relative clause functions as:", options: ["Noun", "Adjective", "Adverb", "Verb"], correct: 1},
+                {q: "Which is an independent clause?", options: ["Although I tried", "Because it rained", "I finished my work", "When I was young"], correct: 2},
+                {q: "Appositive phrase: 'My friend, a doctor, is here.' 'A doctor' is:", options: ["Noun phrase", "Appositive phrase", "Adjective phrase", "Verb phrase"], correct: 1},
+                {q: "Elliptical clause: 'When (I am) in Rome, do as the Romans do.' This is:", options: ["Independent", "Dependent elliptical", "Phrase", "Noun clause"], correct: 1},
+                {q: "Which has an adverbial phrase?", options: ["The boy runs quickly", "He is a student", "She sings", "They are happy"], correct: 0},
+                {q: "Main clause in: 'Although it rained, we went out.'", options: ["Although it rained", "it rained", "we went out", "Although"], correct: 2}
+            ],
+            vn: [
+                {q: "Identify the verbal: 'She likes to swim.'", options: ["likes", "to swim", "She", "swim"], correct: 1},
+                {q: "Nominal functioning as subject: '___ is fun.'", options: ["Swimming", "Swim", "To swim", "Both A and C"], correct: 3},
+                {q: "Finite verb in: 'He writes a letter.'", options: ["He", "writes", "a letter", "writes a letter"], correct: 1},
+                {q: "Non-finite verb (gerund):", options: ["I swim", "Swimming is good", "He swims", "They swam"], correct: 1},
+                {q: "Verbal as adjective: 'The ___ window is broken.'", options: ["break", "broke", "broken", "breaking"], correct: 2},
+                {q: "Nominal as object: 'I want ___.'", options: ["to go", "go", "going", "went"], correct: 0},
+                {q: "Stative verb (not used in continuous):", options: ["run", "think", "know", "play"], correct: 2},
+                {q: "Auxiliary verb in: 'She is singing.'", options: ["She", "is", "singing", "is singing"], correct: 1},
+                {q: "Transitive verb requires:", options: ["Subject", "Object", "Adverb", "Adjective"], correct: 1},
+                {q: "Intransitive verb:", options: ["buy", "eat", "sleep", "give"], correct: 2},
+                {q: "Verbal noun (Gerund):", options: ["To run is fun", "Running is fun", "He runs fast", "He is running"], correct: 1},
+                {q: "Infinitive with 'to' omitted: 'I made him ___.'", options: ["to go", "go", "going", "went"], correct: 1},
+                {q: "Perfect participle: '___ his work, he went home.'", options: ["Do", "Doing", "Having done", "Done"], correct: 2},
+                {q: "Nominal as appositive: 'My friend, ___, is here.'", options: ["he", "him", "John", "doctor"], correct: 2},
+                {q: "Causative verb: 'I have my hair ___.'", options: ["cut", "cuts", "cutting", "to cut"], correct: 0},
+                {q: "Modal auxiliary:", options: ["is", "have", "can", "do"], correct: 2},
+                {q: "Semi-modal:", options: ["must", "ought to", "will", "shall"], correct: 1},
+                {q: "Phrasal verb: 'She ___ (menghormati) her parents.'", options: ["looks after", "looks for", "looks up to", "looks into"], correct: 2},
+                {q: "Linking verb:", options: ["run", "write", "become", "make"], correct: 2},
+                {q: "Compound nominal: 'Bread and butter is my breakfast.' Subject is:", options: ["Bread", "Butter", "Bread and butter", "My breakfast"], correct: 2}
+            ],
+            v: [
+                {q: "V1 (Base form) of 'went':", options: ["go", "gone", "going", "went"], correct: 0},
+                {q: "V2 (Past tense) of 'write':", options: ["write", "wrote", "written", "writing"], correct: 1},
+                {q: "V3 (Past participle) of 'eat':", options: ["eat", "ate", "eaten", "eating"], correct: 2},
+                {q: "Correct: 'I have ___ the letter.'", options: ["write", "wrote", "written", "writing"], correct: 2},
+                {q: "Simple past of 'sing':", options: ["sing", "sang", "sung", "singing"], correct: 1},
+                {q: "Present perfect uses:", options: ["V1", "V2", "V3", "V-ing"], correct: 2},
+                {q: "Irregular verb with V1=V2=V3:", options: ["go-went-gone", "cut-cut-cut", "see-saw-seen", "take-took-taken"], correct: 1},
+                {q: "Past participle of 'break':", options: ["break", "broke", "broken", "breaking"], correct: 2},
+                {q: "Simple present third person: 'He ___ to school.'", options: ["go", "goes", "gone", "going"], correct: 1},
+                {q: "V2 of 'drink':", options: ["drink", "drank", "drunk", "drinking"], correct: 1},
+                {q: "Passive voice uses:", options: ["V1", "V2", "V3", "V-ing"], correct: 2},
+                {q: "Correct: 'She has ___ the book.'", options: ["take", "took", "taken", "taking"], correct: 2},
+                {q: "Past tense of 'choose':", options: ["choose", "chose", "chosen", "choosing"], correct: 1},
+                {q: "V3 of 'speak':", options: ["speak", "spoke", "spoken", "speaking"], correct: 2},
+                {q: "Modal verb always followed by:", options: ["V1", "V2", "V3", "V-ing"], correct: 0},
+                {q: "Correct: 'I ___ (go) to Bali last year.'", options: ["go", "went", "gone", "have gone"], correct: 1},
+                {q: "Perfect continuous uses:", options: ["been + V-ing", "be + V-ing", "being + V3", "have + V3"], correct: 0},
+                {q: "V1, V2, V3 of 'begin':", options: ["begin-began-begun", "begin-begin-began", "begin-begun-began", "beginning-began-begun"], correct: 0},
+                {q: "Negative simple past: 'I did not ___'", options: ["went", "go", "gone", "going"], correct: 1},
+                {q: "After 'has been' we use:", options: ["V1", "V2", "V3", "V-ing"], correct: 3}
+            ],
+            ap: [
+                {q: "Change to passive: 'The chef cooks the meal.'", options: ["The meal is cooked by the chef", "The meal cooks by the chef", "The chef is cooked the meal", "The meal cooked by the chef"], correct: 0},
+                {q: "Active: 'She wrote a novel.' Passive:", options: ["A novel was written by her", "A novel is written by her", "She was written a novel", "A novel wrote by her"], correct: 0},
+                {q: "Passive in present continuous: 'The house ___ (build).'", options: ["is built", "is being built", "was built", "has been built"], correct: 1},
+                {q: "Active to passive: 'They will finish the project.'", options: ["The project will be finished", "The project will finish", "The project is finished", "The project was finished"], correct: 0},
+                {q: "Modal passive: 'The work can ___ (do).'", options: ["do", "be done", "being done", "been done"], correct: 1},
+                {q: "Past perfect passive: 'The letter had ___ (send).'", options: ["sent", "been sent", "being sent", "be sent"], correct: 1},
+                {q: "Active subject becomes in passive:", options: ["Subject", "Object", "Agent with 'by'", "Complement"], correct: 2},
+                {q: "Passive form of 'Someone stole my bag':", options: ["My bag stole", "My bag was stolen", "My bag is stolen", "My bag has stolen"], correct: 1},
+                {q: "Future perfect passive: 'The book will have ___ (publish).'", options: ["published", "been published", "be published", "being published"], correct: 1},
+                {q: "Which CANNOT be changed to passive?", options: ["She eats an apple", "He sleeps", "They built a house", "I love you"], correct: 1},
+                {q: "Passive with modal perfect: 'It must have ___ (steal).'", options: ["stolen", "been stolen", "be stolen", "being stolen"], correct: 1},
+                {q: "Get-passive (informal): 'He got ___ (fire).'", options: ["fire", "fired", "firing", "to fire"], correct: 1},
+                {q: "Active: 'People say that he is rich.' Passive:", options: ["It is said that he is rich", "That he is rich is said", "He is said rich", "People are said he is rich"], correct: 0},
+                {q: "Causative passive: 'I had my car ___ (repair).'", options: ["repair", "repaired", "repairing", "to repair"], correct: 1},
+                {q: "Present perfect continuous passive is:", options: ["Common", "Rare/Avoided", "Easy", "Simple"], correct: 1},
+                {q: "Agent is omitted when:", options: ["Important", "Unknown or unimportant", "Always", "Never"], correct: 1},
+                {q: "Double object passive: 'I was given a book.' Active:", options: ["Someone gave me a book", "I gave a book", "A book gave me", "Someone gave a book me"], correct: 0},
+                {q: "Passive with 'being': 'The problem is being ___ (discuss).'", options: ["discuss", "discussed", "discussing", "to discuss"], correct: 1},
+                {q: "Prepositional verb in passive: 'He was laughed ___.'", options: ["at", "on", "to", "for"], correct: 0},
+                {q: "Impersonal passive: '___ that the earth is round.'", options: ["It is said", "People say", "Someone says", "We say"], correct: 0}
+            ],
+            hv: [
+                {q: "Helping verb in: 'She is playing.'", options: ["She", "is", "playing", "is playing"], correct: 1},
+                {q: "Auxiliary for perfect tense:", options: ["be", "have", "do", "will"], correct: 1},
+                {q: "Modal for ability:", options: ["can", "may", "must", "should"], correct: 0},
+                {q: "Helping verb in negative: 'I do not like it.'", options: ["I", "do", "not", "like"], correct: 1},
+                {q: "Modal for strong obligation:", options: ["can", "may", "must", "might"], correct: 2},
+                {q: "Auxiliary for continuous:", options: ["be", "have", "do", "would"], correct: 0},
+                {q: "Past tense of 'can':", options: ["can", "could", "canned", "have can"], correct: 1},
+                {q: "Modal for advice:", options: ["can", "may", "must", "should"], correct: 3},
+                {q: "Emphatic 'do': 'I ___ love you!'", options: ["do", "does", "did", "done"], correct: 0},
+                {q: "Helping verb for question: '___ you like it?'", options: ["Are", "Have", "Do", "Can"], correct: 2},
+                {q: "Modal + have + V3 expresses:", options: ["Present", "Past possibility/regret", "Future", "Continuous"], correct: 1},
+                {q: "'Ought to' means:", options: ["Ability", "Permission", "Obligation/Advice", "Possibility"], correct: 2},
+                {q: "Semi-modal for future intention:", options: ["can", "be going to", "may", "must"], correct: 1},
+                {q: "Helping verb in: 'They have finished.'", options: ["They", "have", "finished", "have finished"], correct: 1},
+                {q: "Modal for past habit:", options: ["will", "would", "can", "shall"], correct: 1},
+                {q: "Negative modal: 'You ___ not smoke here.' (prohibition)", options: ["cannot", "may not", "must not", "might not"], correct: 2},
+                {q: "Perfect continuous auxiliary:", options: ["have been", "has", "be", "being"], correct: 0},
+                {q: "Modal deduction (past): 'He ___ have stolen it.' (negative)", options: ["cannot", "must not", "may not", "might not"], correct: 0},
+                {q: "'Used to' indicates:", options: ["Present habit", "Past habit/state", "Future", "Obligation"], correct: 1},
+                {q: "Passive auxiliary: 'The cake ___ eaten.'", options: ["is", "is being", "has been", "All can be correct"], correct: 3}
+            ],
+            ten: [
+                {q: "Simple present for:", options: ["Action happening now", "Habit/routine", "Completed action", "Action before past"], correct: 1},
+                {q: "Present continuous form:", options: ["S + V1", "S + am/is/are + V-ing", "S + have/has + V3", "S + V2"], correct: 1},
+                {q: "Signal word for simple past:", options: ["every day", "now", "yesterday", "since"], correct: 2},
+                {q: "Present perfect uses:", options: ["Finished time", "Unfinished time", "Future", "Past continuous"], correct: 1},
+                {q: "Past perfect: 'When I arrived, he ___ (leave).'", options: ["left", "has left", "had left", "was leaving"], correct: 2},
+                {q: "Future continuous:", options: ["will go", "will be going", "will have gone", "is going"], correct: 1},
+                {q: "Present perfect continuous emphasizes:", options: ["Completion", "Duration", "Habit", "Future"], correct: 1},
+                {q: "Simple future with 'going to' for:", options: ["Spontaneous decision", "Planned intention", "Habit", "Past"], correct: 1},
+                {q: "Past continuous: 'I ___ (sleep) when he called.'", options: ["slept", "was sleeping", "had slept", "am sleeping"], correct: 1},
+                {q: "Future perfect: 'By 2025, I ___ (graduate).'", options: ["will graduate", "will be graduating", "will have graduated", "graduate"], correct: 2},
+                {q: "Present perfect with 'since':", options: ["Point in time", "Duration", "Future time", "Past time"], correct: 0},
+                {q: "Past perfect continuous:", options: ["had + V3", "had been + V-ing", "was + V-ing", "have been + V-ing"], correct: 1},
+                {q: "Signal: 'Look! The baby ___ (cry).'", options: ["cries", "is crying", "has cried", "cried"], correct: 1},
+                {q: "Future perfect continuous:", options: ["will have worked", "will have been working", "will be working", "have been working"], correct: 1},
+                {q: "Simple present for future:", options: ["Timetables", "Predictions", "Intentions", "All above"], correct: 0},
+                {q: "Present perfect negative: 'I ___ (not/see) him today.'", options: ["don't see", "didn't see", "haven't seen", "am not seeing"], correct: 2},
+                {q: "Past simple vs present perfect: 'I ___ (lose) my key yesterday.'", options: ["have lost", "lost", "had lost", "am losing"], correct: 1},
+                {q: "Future in the past: 'He said he ___ (come).'", options: ["will come", "would come", "comes", "is coming"], correct: 1},
+                {q: "Present continuous for future:", options: ["Arrangement", "Prediction", "Timetable", "Habit"], correct: 0},
+                {q: "Which is NOT a tense aspect?", options: ["Simple", "Continuous", "Perfect", "Conditional"], correct: 3}
+            ],
+            csi: [
+                {q: "Type 2 conditional: 'If I ___ rich, I would buy it.'", options: ["am", "was", "were", "be"], correct: 2},
+                {q: "Type 3 conditional result:", options: ["would + V1", "would have + V3", "will + V1", "V2"], correct: 1},
+                {q: "Subjunctive after 'suggest': 'I suggest that he ___ (study).'", options: ["studies", "studied", "study", "studying"], correct: 2},
+                {q: "Inverted conditional: '___ I known, I would have come.'", options: ["If", "Had", "Have", "Did"], correct: 1},
+                {q: "Subjunctive 'were' for:", options: ["I only", "You only", "All subjects", "Plural only"], correct: 2},
+                {q: "Wish (present): 'I wish I ___ taller.'", options: ["am", "was", "were", "be"], correct: 2},
+                {q: "Wish (past): 'I wish I ___ (go) there.'", options: ["went", "had gone", "have gone", "go"], correct: 1},
+                {q: "As if (unreal present): 'He acts as if he ___ the boss.'", options: ["is", "was", "were", "be"], correct: 2},
+                {q: "If only (regret): 'If only I ___ (listen) to you!'", options: ["listen", "listened", "had listened", "have listened"], correct: 2},
+                {q: "It is important that... (subjunctive):", options: ["he is", "he be", "he was", "he were"], correct: 1},
+                {q: "Inverted with negative adverb: 'Never ___ I seen such beauty.'", options: ["I have", "have I", "I had", "had I"], correct: 1},
+                {q: "No sooner...than: 'No sooner had I arrived ___ it rained.'", options: ["when", "than", "then", "as"], correct: 1},
+                {q: "Conditional type 0:", options: ["Real future", "General truth", "Unreal present", "Unreal past"], correct: 1},
+                {q: "Unless means:", options: ["If", "If not", "Because", "Although"], correct: 1},
+                {q: "Provided that =", options: ["If", "Unless", "Although", "Because"], correct: 0},
+                {q: "Subjunctive in: 'It is essential that she ___ present.'", options: ["is", "be", "was", "were"], correct: 1},
+                {q: "Were I you (= If I were you) is:", options: ["Type 1", "Type 2 inverted", "Type 3", "Not conditional"], correct: 1},
+                {q: "Mixed conditional (past condition, present result): 'If I had studied, I ___ smart now.'", options: ["would be", "would have been", "was", "am"], correct: 0},
+                {q: "Should in conditional inversion: '___ you need help, call me.'", options: ["If", "Had", "Were", "Should"], correct: 3},
+                {q: "But for (if not for): 'But for your help, I ___ (fail).'", options: ["would fail", "would have failed", "had failed", "failed"], correct: 1}
+            ]
+        };
+
+        // State
+        let currentSlide = 1;
+        const totalSlides = 12;
+        const scores = {
+            pos: 0, pro: 0, sp: 0, pc: 0, vn: 0,
+            v: 0, ap: 0, hv: 0, ten: 0, csi: 0
+        };
+        const currentQuestion = {
+            pos: 0, pro: 0, sp: 0, pc: 0, vn: 0,
+            v: 0, ap: 0, hv: 0, ten: 0, csi: 0
+        };
+        const userAnswers = {
+            pos: [], pro: [], sp: [], pc: [], vn: [],
+            v: [], ap: [], hv: [], ten: [], csi: []
+        };
+
+        // Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            createParticles();
+            updateSlide();
+            initQuizzes();
+        });
+
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.width = Math.random() * 4 + 2 + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                particle.style.animationDuration = Math.random() * 10 + 10 + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        function updateSlide() {
+            document.querySelectorAll('.slide').forEach((slide, index) => {
+                slide.classList.toggle('active', index + 1 === currentSlide);
+            });
+            
+            document.getElementById('slideIndicator').textContent = `${currentSlide} / ${totalSlides}`;
+            document.getElementById('prevBtn').disabled = currentSlide === 1;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides;
+            
+            const progress = (currentSlide / totalSlides) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+
+            if (currentSlide === totalSlides) {
+                calculateFinalScore();
+            }
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                updateSlide();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 1) {
+                currentSlide--;
+                updateSlide();
+            }
+        }
+
+        function showTab(tabName) {
+            const slide = document.querySelector('.slide.active');
+            slide.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            slide.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.getElementById(tabName).classList.remove('hidden');
+            event.target.classList.add('active');
+        }
+
+        function initQuizzes() {
+            Object.keys(questions).forEach(type => {
+                renderQuestion(type);
+            });
+        }
+
+        function renderQuestion(type) {
+            const container = document.getElementById(`${type}-question-container`);
+            const qIndex = currentQuestion[type];
+            
+            if (qIndex >= questions[type].length) {
+                showResult(type);
+                return;
+            }
+
+            const q = questions[type][qIndex];
+            container.innerHTML = `
+                <div class="mb-6">
+                    <h5 class="text-lg font-semibold mb-4 text-gray-200">${q.q}</h5>
+                    <div class="space-y-3">
+                        ${q.options.map((opt, idx) => `
+                            <div class="option-card p-4 rounded-lg border border-gray-600 bg-gray-800/50" 
+                                 onclick="selectAnswer('${type}', ${idx})">
+                                <span class="font-medium text-gray-300">${String.fromCharCode(65 + idx)}. ${opt}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                <div class="flex justify-between items-center">
+                    <button onclick="prevQuestion('${type}')" class="px-4 py-2 rounded-lg bg-gray-700 text-gray-300 ${qIndex === 0 ? 'opacity-50 cursor-not-allowed' : ''}" ${qIndex === 0 ? 'disabled' : ''}>
+                        Sebelumnya
+                    </button>
+                    <span class="text-sm text-gray-400">Pilih jawaban untuk melanjutkan</span>
+                </div>
+            `;
+            
+            document.getElementById(`${type}-current`).textContent = qIndex + 1;
+        }
+
+        function selectAnswer(type, answerIndex) {
+            const container = document.getElementById(`${type}-question-container`);
+            const cards = container.querySelectorAll('.option-card');
+            
+            cards.forEach((card, idx) => {
+                card.classList.remove('selected');
+                if (idx === answerIndex) {
+                    card.classList.add('selected');
+                }
+            });
+
+            userAnswers[type][currentQuestion[type]] = answerIndex;
+
+            setTimeout(() => {
+                currentQuestion[type]++;
+                renderQuestion(type);
+            }, 500);
+        }
+
+        function prevQuestion(type) {
+            if (currentQuestion[type] > 0) {
+                currentQuestion[type]--;
+                renderQuestion(type);
+            }
+        }
+
+        function showResult(type) {
+            const container = document.getElementById(`${type}-question-container`);
+            const resultDiv = document.getElementById(`${type}-result`);
+            
+            let correct = 0;
+            questions[type].forEach((q, idx) => {
+                if (userAnswers[type][idx] === q.correct) correct++;
+            });
+            
+            scores[type] = correct;
+            
+            container.classList.add('hidden');
+            resultDiv.classList.remove('hidden');
+            
+            const percentage = (correct / 20) * 100;
+            document.getElementById(`${type}-score`).textContent = `${correct}/20`;
+            document.getElementById(`${type}-score`).className = `text-4xl font-bold mb-2 ${percentage >= 70 ? 'text-green-400' : percentage >= 50 ? 'text-yellow-400' : 'text-red-400'}`;
+            
+            let message = '';
+            if (percentage >= 90) message = 'Sempurna! Luar biasa! 🌟';
+            else if (percentage >= 70) message = 'Bagus! Pertahankan! 👍';
+            else if (percentage >= 50) message = 'Cukup, masih bisa ditingkatkan! 📚';
+            else message = 'Perlu belajar lagi, semangat! 💪';
+            
+            document.getElementById(`${type}-message`).textContent = message;
+        }
+
+        function restartQuiz(type) {
+            currentQuestion[type] = 0;
+            userAnswers[type] = [];
+            scores[type] = 0;
+            document.getElementById(`${type}-question-container`).classList.remove('hidden');
+            document.getElementById(`${type}-result`).classList.add('hidden');
+            renderQuestion(type);
+        }
+
+        function calculateFinalScore() {
+            let total = 0;
+            Object.keys(scores).forEach(key => {
+                total += scores[key];
+                document.getElementById(`score-${key}`).textContent = `${scores[key]}/20`;
+            });
+            
+            document.getElementById('finalScoreDisplay').textContent = total;
+            const degrees = (total / 200) * 360;
+            document.getElementById('finalScoreCircle').style.setProperty('--score-deg', degrees + 'deg');
+            
+            const percentage = (total / 200) * 100;
+            let message = '';
+            if (percentage >= 90) message = 'EXCELLENT! Master of English! 🏆';
+            else if (percentage >= 80) message = 'GREAT JOB! Very Good! ⭐';
+            else if (percentage >= 70) message = 'GOOD! Keep Learning! 📖';
+            else if (percentage >= 60) message = 'AVERAGE! Need More Practice ✏️';
+            else message = 'KEEP TRYING! Review the Material 📚';
+            
+            document.getElementById('finalMessage').textContent = message;
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+    </script>
+</body>
+</html>
